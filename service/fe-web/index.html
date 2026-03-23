@@ -5,6 +5,14 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>fe-web</title>
+    <script>
+      window.__ENV__ = {
+        VITE_SERVICE_NAME: "${VITE_SERVICE_NAME}",
+        VITE_SERVICE_VERSION: "${VITE_SERVICE_VERSION}",
+        VITE_DEPLOYMENT_ENV: "${VITE_DEPLOYMENT_ENV}",
+        VITE_OTLP_TRACES_PATH: "${VITE_OTLP_TRACES_PATH}"
+      };
+    </script>
   </head>
   <body>
     <div id="root"></div>

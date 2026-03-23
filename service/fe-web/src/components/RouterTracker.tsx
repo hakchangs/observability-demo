@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { trace, SpanStatusCode } from '@opentelemetry/api';
+import { setPage, getPageAttributes } from '../navigation-context';
 
 const tracer = trace.getTracer('fe-web');
 
@@ -10,6 +11,7 @@ export default function RouterTracker() {
 
   useEffect(() => {
     const to = location.pathname;
+    setPage(to);
 
     if (prevPath.current === null) {
       prevPath.current = to;
@@ -20,6 +22,7 @@ export default function RouterTracker() {
       attributes: {
         'route.from': prevPath.current,
         'route.to': to,
+        ...getPageAttributes(),
       },
     });
     span.setStatus({ code: SpanStatusCode.OK });

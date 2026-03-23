@@ -18,11 +18,11 @@ services:
     networks:
       - demo-net
     healthcheck:
-      test: ["CMD-SHELL", "nc -z localhost 8881 || exit 1"]
+      test: ["CMD", "curl", "-s", "-o", "/dev/null", "http://localhost:8080/"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
+      start_period: 90s
 
   be-product:
     build:
@@ -43,11 +43,11 @@ services:
     networks:
       - demo-net
     healthcheck:
-      test: ["CMD-SHELL", "nc -z localhost 8882 || exit 1"]
+      test: ["CMD", "curl", "-s", "-o", "/dev/null", "http://localhost:8080/"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
+      start_period: 90s
 
   be-subscription:
     build:
@@ -68,11 +68,11 @@ services:
     networks:
       - demo-net
     healthcheck:
-      test: ["CMD-SHELL", "nc -z localhost 8883 || exit 1"]
+      test: ["CMD", "curl", "-s", "-o", "/dev/null", "http://localhost:8080/"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
+      start_period: 90s
 
   be-bff:
     build:
@@ -82,9 +82,9 @@ services:
     volumes:
       - ./opentelemetry-javaagent.jar:/app/opentelemetry-javaagent.jar:ro
     environment:
-      SERVICES_AUTH_URL: http://be-auth:8881
-      SERVICES_PRODUCT_URL: http://be-product:8882
-      SERVICES_SUBSCRIPTION_URL: http://be-subscription:8883
+      SERVICES_AUTH_URL: http://be-auth:8080
+      SERVICES_PRODUCT_URL: http://be-product:8080
+      SERVICES_SUBSCRIPTION_URL: http://be-subscription:8080
       JAVA_TOOL_OPTIONS: >-
         -javaagent:/app/opentelemetry-javaagent.jar
         -Dotel.service.name=be-bff
@@ -103,25 +103,24 @@ services:
       be-subscription:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "nc -z localhost 8880 || exit 1"]
+      test: ["CMD", "curl", "-s", "-o", "/dev/null", "http://localhost:8080/"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
+      start_period: 90s
 
   fe-web:
     build:
       context: ./fe-web
-      args:
-        VITE_SERVICE_NAME: fe-web
-        VITE_SERVICE_VERSION: 0.0.1
-        VITE_DEPLOYMENT_ENV: production
-        VITE_OTLP_TRACES_PATH: /v1/traces
     ports:
       - "3000:80"
     environment:
-      BFF_URL: http://be-bff:8880
+      BFF_URL: http://be-bff:8080
       OTEL_COLLECTOR_URL: http://192.168.122.46:4318
+      VITE_SERVICE_NAME: fe-web
+      VITE_SERVICE_VERSION: 0.0.1
+      VITE_DEPLOYMENT_ENV: production
+      VITE_OTLP_TRACES_PATH: /v1/traces
     networks:
       - demo-net
     depends_on:

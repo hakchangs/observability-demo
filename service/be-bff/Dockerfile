@@ -9,6 +9,7 @@ RUN ./mvnw package -DskipTests -q
 
 # Stage 2: JRE 런타임
 FROM eclipse-temurin:21-jre-alpine
+RUN apk add --no-cache curl
 WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
 

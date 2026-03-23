@@ -8,16 +8,24 @@ import { DocumentLoadInstrumentation } from '@opentelemetry/instrumentation-docu
 import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch';
 // import { UserInteractionInstrumentation } from '@opentelemetry/instrumentation-user-interaction';
 import { ZoneContextManager } from "@opentelemetry/context-zone"
+import { getPageAttributes } from './navigation-context';
 
-const OTLP_URL = import.meta.env.VITE_OTLP_TRACES_PATH ?? '/v1/traces';
+// 런타임 주입값 우선, 미치환(${...}) 이면 Vite 빌드값으로 폴백 (로컬 dev 지원)
+function runtimeEnv(key: string, fallback: string): string {
+  const val = (window as any).__ENV__?.[key];
+  if (val && !val.startsWith('${')) return val;
+  return (import.meta.env[key] as string | undefined) ?? fallback;
+}
+
+const OTLP_URL = runtimeEnv('VITE_OTLP_TRACES_PATH', '/v1/traces');
 
 const exporter = new OTLPTraceExporter({ url: OTLP_URL });
 
 const provider = new WebTracerProvider({
   resource: new Resource({
-    'service.name': import.meta.env.VITE_SERVICE_NAME ?? 'fe-web',
-    'service.version': import.meta.env.VITE_SERVICE_VERSION ?? '0.0.1',
-    'deployment.environment': import.meta.env.VITE_DEPLOYMENT_ENV ?? 'demo',
+    'service.name': runtimeEnv('VITE_SERVICE_NAME', 'fe-web'),
+    'service.version': runtimeEnv('VITE_SERVICE_VERSION', '0.0.1'),
+    'deployment.environment': runtimeEnv('VITE_DEPLOYMENT_ENV', 'demo'),
   }),
   spanProcessors: [new BatchSpanProcessor(exporter)]
 });
@@ -31,6 +39,11 @@ registerInstrumentations({
   instrumentations: [
     new DocumentLoadInstrumentation(),
     // new UserInteractionInstrumentation({ eventNames: ['click'] }),
-    new FetchInstrumentation({ clearTimingResources: true }),
+    new FetchInstrumentation({
+      clearTimingResources: true,
+      applyCustomAttributesOnSpan: (span) => {
+        span.setAttributes(getPageAttributes());
+      },
+    }),
   ],
 });
