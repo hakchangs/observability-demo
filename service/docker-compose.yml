@@ -1,0 +1,133 @@
+services:
+  be-auth:
+    build:
+      context: ./be-auth
+    ports:
+      - "8881:8881"
+    volumes:
+      - ./opentelemetry-javaagent.jar:/app/opentelemetry-javaagent.jar:ro
+    environment:
+      JAVA_TOOL_OPTIONS: >-
+        -javaagent:/app/opentelemetry-javaagent.jar
+        -Dotel.service.name=be-auth
+        -Dotel.metrics.exporter=otlp
+        -Dotel.logs.exporter=otlp
+        -Dotel.traces.exporter=otlp
+        -Dotel.exporter.otlp.endpoint=http://192.168.122.46:4317
+        -Dotel.exporter.otlp.protocol=grpc
+    networks:
+      - demo-net
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 8881 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  be-product:
+    build:
+      context: ./be-product
+    ports:
+      - "8882:8882"
+    volumes:
+      - ./opentelemetry-javaagent.jar:/app/opentelemetry-javaagent.jar:ro
+    environment:
+      JAVA_TOOL_OPTIONS: >-
+        -javaagent:/app/opentelemetry-javaagent.jar
+        -Dotel.service.name=be-product
+        -Dotel.metrics.exporter=otlp
+        -Dotel.logs.exporter=otlp
+        -Dotel.traces.exporter=otlp
+        -Dotel.exporter.otlp.endpoint=http://192.168.122.46:4317
+        -Dotel.exporter.otlp.protocol=grpc
+    networks:
+      - demo-net
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 8882 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  be-subscription:
+    build:
+      context: ./be-subscription
+    ports:
+      - "8883:8883"
+    volumes:
+      - ./opentelemetry-javaagent.jar:/app/opentelemetry-javaagent.jar:ro
+    environment:
+      JAVA_TOOL_OPTIONS: >-
+        -javaagent:/app/opentelemetry-javaagent.jar
+        -Dotel.service.name=be-subscription
+        -Dotel.metrics.exporter=otlp
+        -Dotel.logs.exporter=otlp
+        -Dotel.traces.exporter=otlp
+        -Dotel.exporter.otlp.endpoint=http://192.168.122.46:4317
+        -Dotel.exporter.otlp.protocol=grpc
+    networks:
+      - demo-net
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 8883 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  be-bff:
+    build:
+      context: ./be-bff
+    ports:
+      - "8880:8880"
+    volumes:
+      - ./opentelemetry-javaagent.jar:/app/opentelemetry-javaagent.jar:ro
+    environment:
+      SERVICES_AUTH_URL: http://be-auth:8881
+      SERVICES_PRODUCT_URL: http://be-product:8882
+      SERVICES_SUBSCRIPTION_URL: http://be-subscription:8883
+      JAVA_TOOL_OPTIONS: >-
+        -javaagent:/app/opentelemetry-javaagent.jar
+        -Dotel.service.name=be-bff
+        -Dotel.metrics.exporter=otlp
+        -Dotel.logs.exporter=otlp
+        -Dotel.traces.exporter=otlp
+        -Dotel.exporter.otlp.endpoint=http://192.168.122.46:4317
+        -Dotel.exporter.otlp.protocol=grpc
+    networks:
+      - demo-net
+    depends_on:
+      be-auth:
+        condition: service_healthy
+      be-product:
+        condition: service_healthy
+      be-subscription:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 8880 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  fe-web:
+    build:
+      context: ./fe-web
+      args:
+        VITE_SERVICE_NAME: fe-web
+        VITE_SERVICE_VERSION: 0.0.1
+        VITE_DEPLOYMENT_ENV: production
+        VITE_OTLP_TRACES_PATH: /v1/traces
+    ports:
+      - "3000:80"
+    environment:
+      BFF_URL: http://be-bff:8880
+      OTEL_COLLECTOR_URL: http://192.168.122.46:4318
+    networks:
+      - demo-net
+    depends_on:
+      be-bff:
+        condition: service_healthy
+
+networks:
+  demo-net:
+    driver: bridge

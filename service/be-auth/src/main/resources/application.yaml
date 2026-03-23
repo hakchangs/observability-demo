@@ -1,0 +1,10 @@
+server:
+  port: 8881
+
+spring:
+  application:
+    name: be-auth
+
+jwt:
+  secret: observability-demo-jwt-secret-key-for-auth-service-2024
+  expiration: 3600000

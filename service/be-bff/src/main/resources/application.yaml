@@ -1,0 +1,14 @@
+server:
+  port: 8880
+
+spring:
+  application:
+    name: be-bff
+
+services:
+  auth-url: http://localhost:8881
+  product-url: http://localhost:8882
+  subscription-url: http://localhost:8883
+
+jwt:
+  secret: observability-demo-jwt-secret-key-for-auth-service-2024

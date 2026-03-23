@@ -1,0 +1,25 @@
+server {
+    listen 80;
+    server_name _;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # SPA — 모든 경로는 index.html로 fallback
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # be-bff 프록시 (Vite proxy '/api' 와 동일)
+    location /api/ {
+        proxy_pass ${BFF_URL};
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+    # OTel Collector 프록시 (Vite proxy '/v1' 과 동일)
+    location /v1/ {
+        proxy_pass ${OTEL_COLLECTOR_URL};
+        proxy_set_header Host $http_host;
+    }
+}
