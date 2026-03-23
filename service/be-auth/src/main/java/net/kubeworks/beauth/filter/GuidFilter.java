@@ -32,13 +32,22 @@ public class GuidFilter extends OncePerRequestFilter {
             guid = generateGuid();
             Baggage newBaggage = Baggage.current().toBuilder().put("guid", guid).build();
             try (Scope scope = newBaggage.storeInContext(Context.current()).makeCurrent()) {
-                Span.current().setAttribute("guid", guid);
+                setSpanAttributes(guid);
                 chain.doFilter(request, response);
             }
         } else {
-            Span.current().setAttribute("guid", guid);
+            setSpanAttributes(guid);
             chain.doFilter(request, response);
         }
+    }
+
+    private void setSpanAttributes(String guid) {
+        Span span = Span.current();
+        span.setAttribute("guid", guid);
+        String sessionId = Baggage.current().getEntryValue("session.id");
+        String userId = Baggage.current().getEntryValue("user.id");
+        if (sessionId != null && !sessionId.isBlank()) span.setAttribute("session.id", sessionId);
+        if (userId != null && !userId.isBlank()) span.setAttribute("user.id", userId);
     }
 
     private String generateGuid() {

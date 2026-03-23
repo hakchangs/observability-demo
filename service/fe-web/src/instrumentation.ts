@@ -10,10 +10,11 @@ import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch';
 // import { ZoneContextManager } from "@opentelemetry/context-zone"
 import { getPageAttributes } from './navigation-context';
 import { getCurrentGuid } from './utils/guid';
+import { getSessionAttributes } from './utils/session';
 
 // 런타임 주입값 우선, 미치환(${...}) 이면 Vite 빌드값으로 폴백 (로컬 dev 지원)
 function runtimeEnv(key: string, fallback: string): string {
-  const val = (window as any).__ENV__?.[key];
+  const val = (window as unknown as { __ENV__?: Record<string, string> }).__ENV__?.[key];
   if (val && !val.startsWith('${')) return val;
   return (import.meta.env[key] as string | undefined) ?? fallback;
 }
@@ -46,6 +47,7 @@ registerInstrumentations({
       clearTimingResources: true,
       applyCustomAttributesOnSpan: (span) => {
         span.setAttributes(getPageAttributes());
+        span.setAttributes(getSessionAttributes());
         const guid = getCurrentGuid();
         if (guid) span.setAttribute('guid', guid);
       },

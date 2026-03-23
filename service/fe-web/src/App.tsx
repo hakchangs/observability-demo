@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import type { LoginResponse } from './api/auth';
+import { initSession, restoreSession, clearSession } from './utils/session';
 import LoginPage from './pages/LoginPage';
 import ProductsPage from './pages/ProductsPage';
 import SubscriptionsPage from './pages/SubscriptionsPage';
@@ -19,6 +20,7 @@ function App() {
     const userId = localStorage.getItem('userId');
     const username = localStorage.getItem('username');
     if (token && userId && username) {
+      restoreSession();
       return { token, userId: Number(userId), username };
     }
     return null;
@@ -28,6 +30,7 @@ function App() {
     localStorage.setItem('token', data.token);
     localStorage.setItem('userId', String(data.userId));
     localStorage.setItem('username', data.username);
+    initSession(String(data.userId));
     setAuth({ token: data.token, userId: data.userId, username: data.username });
   };
 
@@ -35,6 +38,7 @@ function App() {
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
     localStorage.removeItem('username');
+    clearSession();
     setAuth(null);
   };
 

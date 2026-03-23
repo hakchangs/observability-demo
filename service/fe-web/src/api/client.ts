@@ -1,4 +1,5 @@
 import { generateGuid, setCurrentGuid } from '../utils/guid';
+import { getSessionBaggage } from '../utils/session';
 
 const getToken = () => localStorage.getItem('token');
 
@@ -10,7 +11,7 @@ async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(options.headers as Record<string, string>),
-    'baggage': `guid=${guid}`,
+    'baggage': [`guid=${guid}`, getSessionBaggage()].filter(Boolean).join(','),
   };
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
