@@ -14,5 +14,5 @@ COPY --from=builder /app/target/*.jar app.jar
 
 ENV JAVA_TOOL_OPTIONS=""
 
-EXPOSE 8883
+EXPOSE 8080
 ENTRYPOINT ["sh", "-c", "java $JAVA_TOOL_OPTIONS -jar app.jar"]

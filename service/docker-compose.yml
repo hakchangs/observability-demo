@@ -3,7 +3,7 @@ services:
     build:
       context: ./be-auth
     ports:
-      - "8881:8881"
+      - "8881:8080"
     volumes:
       - ./opentelemetry-javaagent.jar:/app/opentelemetry-javaagent.jar:ro
     environment:
@@ -28,7 +28,7 @@ services:
     build:
       context: ./be-product
     ports:
-      - "8882:8882"
+      - "8882:8080"
     volumes:
       - ./opentelemetry-javaagent.jar:/app/opentelemetry-javaagent.jar:ro
     environment:
@@ -53,7 +53,7 @@ services:
     build:
       context: ./be-subscription
     ports:
-      - "8883:8883"
+      - "8883:8080"
     volumes:
       - ./opentelemetry-javaagent.jar:/app/opentelemetry-javaagent.jar:ro
     environment:
@@ -78,7 +78,7 @@ services:
     build:
       context: ./be-bff
     ports:
-      - "8880:8880"
+      - "8880:8080"
     volumes:
       - ./opentelemetry-javaagent.jar:/app/opentelemetry-javaagent.jar:ro
     environment:

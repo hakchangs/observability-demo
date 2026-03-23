@@ -1,6 +1,3 @@
-server:
-  port: 8882
-
 spring:
   application:
     name: be-product
