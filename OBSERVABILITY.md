@@ -1,8 +1,8 @@
 
-## Browser 추적 
-React 기준 추적제공 범위를 정의함
 
-### 가능범위
+## Tracing
+
+### Browser 추적 가능범위 (React 기준)
 1. Document Load: 페이지 로딩 시점 (리로딩 없는경우 1회만 호출)
    - DocumentLoadInstrumentation 설정시 자동 수집
 2. Routing(Navigation): React Route 로 SPA 방식의 리렌더링을 통한 페이지 이동
@@ -13,7 +13,7 @@ React 기준 추적제공 범위를 정의함
    - UserInteractionInstrumentation 설정시 자동 수집
    - event 를 button 으로 한정해도 노이즈가 심함
 
-### page - 백엔드 추적 연계
+### Routing - 백엔드 추적 연계 (>>page.id)
 - fetch 를 제외한 모든 추적이 백엔드와 연결되지 않음 (DocumentLoad, Routing, 액션 모두 미지원)
 - React 기술적 문제로 직접 연결은 어려우나 Span attribute 속성을 추가하여 검색을 통한 확인은 가능함 
   - correlation ID 를 별도로 생성하고 span attribute 에 저장하여 검색 지원
@@ -51,7 +51,7 @@ React 기준 추적제공 범위를 정의함
   환경에서도 충분히 사용되는 방식입니다.
 ```
 
-### RUM 기준
+### [참고] RUM 기준
 
 ```markdown
   ---
@@ -91,5 +91,15 @@ React 기준 추적제공 범위를 정의함
 
   ---
 ```
+
+### GUID 추적 연결 (>>guid)
+기존 Legacy 시스템에 존재하는 guid 체계와 연결 지원범위 정리
+
+#### Baggage 전파 + Span attribute 저장
+Baggage 전파로 Span 간 GUID 공유가능하도록 지원하고\
+Span attribute 에 저장하여 검색 지원.\
+TraceID 는 Hex 값만 허용하므로 활용하기 어려워 별도 값을 설정하여 대안방식을 적용함
+
+### 
 
 

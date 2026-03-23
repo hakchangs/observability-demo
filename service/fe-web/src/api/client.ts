@@ -1,10 +1,16 @@
+import { generateGuid, setCurrentGuid } from '../utils/guid';
+
 const getToken = () => localStorage.getItem('token');
 
 async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
+  const guid = generateGuid();
+  setCurrentGuid(guid);
+
   const token = getToken();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(options.headers as Record<string, string>),
+    'baggage': `guid=${guid}`,
   };
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
