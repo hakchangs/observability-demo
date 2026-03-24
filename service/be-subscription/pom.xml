@@ -69,6 +69,12 @@
             <artifactId>spring-boot-starter-webmvc-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Kafka -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-kafka</artifactId>
+        </dependency>
+
         <!-- OTEL Custom 을 위한 기본 LIB -->
         <dependency>
             <groupId>io.opentelemetry</groupId>

@@ -1,10 +1,11 @@
 package net.kubeworks.beproduct.domain;
 
 import jakarta.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "product")
-public class Product {
+public class Product implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,7 +20,7 @@ public class Product {
     private Long monthlyPremium;
     private String coverage;
 
-    protected Product() {}
+    public Product() {}
 
     public Product(String name, String type, String description, Long monthlyPremium, String coverage) {
         this.name = name;

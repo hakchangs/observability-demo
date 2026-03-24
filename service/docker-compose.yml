@@ -24,6 +24,43 @@ services:
       retries: 5
       start_period: 90s
 
+  kafka:
+    image: apache/kafka:latest
+    ports:
+      - "9092:9092"   # Docker 내부 (be-* 서비스)
+      - "9093:9093"   # 외부 로컬 접속용
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: INTERNAL://:9092,EXTERNAL://:9093,CONTROLLER://:9094
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://localhost:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9094
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    networks:
+      - demo-net
+    healthcheck:
+      test: ["CMD", "/opt/kafka/bin/kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - demo-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   be-product:
     build:
       context: ./be-product
@@ -32,6 +69,8 @@ services:
     volumes:
       - ./opentelemetry-javaagent.jar:/app/opentelemetry-javaagent.jar:ro
     environment:
+      REDIS_HOST: redis
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       JAVA_TOOL_OPTIONS: >-
         -javaagent:/app/opentelemetry-javaagent.jar
         -Dotel.service.name=be-product
@@ -40,6 +79,11 @@ services:
         -Dotel.traces.exporter=otlp
         -Dotel.exporter.otlp.endpoint=http://192.168.122.46:4317
         -Dotel.exporter.otlp.protocol=grpc
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
     networks:
       - demo-net
     healthcheck:
@@ -57,6 +101,7 @@ services:
     volumes:
       - ./opentelemetry-javaagent.jar:/app/opentelemetry-javaagent.jar:ro
     environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       JAVA_TOOL_OPTIONS: >-
         -javaagent:/app/opentelemetry-javaagent.jar
         -Dotel.service.name=be-subscription
@@ -65,6 +110,9 @@ services:
         -Dotel.traces.exporter=otlp
         -Dotel.exporter.otlp.endpoint=http://192.168.122.46:4317
         -Dotel.exporter.otlp.protocol=grpc
+    depends_on:
+      kafka:
+        condition: service_healthy
     networks:
       - demo-net
     healthcheck:
