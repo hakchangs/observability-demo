@@ -1,5 +1,8 @@
 import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
-import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
+import {
+    // BatchSpanProcessor,
+    SimpleSpanProcessor
+} from '@opentelemetry/sdk-trace-base';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { Resource } from '@opentelemetry/resources';
 import { W3CTraceContextPropagator, W3CBaggagePropagator, CompositePropagator } from '@opentelemetry/core';
@@ -11,6 +14,7 @@ import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch';
 import { getPageAttributes } from './navigation-context';
 import { getCurrentGuid } from './utils/guid';
 import { getSessionAttributes } from './utils/session';
+import { initWebVitals } from './utils/web-vitals-reporter';
 
 // 런타임 주입값 우선, 미치환(${...}) 이면 Vite 빌드값으로 폴백 (로컬 dev 지원)
 function runtimeEnv(key: string, fallback: string): string {
@@ -29,7 +33,10 @@ const provider = new WebTracerProvider({
     'service.version': runtimeEnv('VITE_SERVICE_VERSION', '0.0.1'),
     'deployment.environment': runtimeEnv('VITE_DEPLOYMENT_ENV', 'demo'),
   }),
-  spanProcessors: [new BatchSpanProcessor(exporter)]
+    // vite HMR 개발환경에서 batch 처리시 큐 소멸로 인해 누락발생
+    // - js 모듈교체로 인한 큐 소멸이라고 하며, 개발환경에서만 발생.
+  // spanProcessors: [new BatchSpanProcessor(exporter, { scheduledDelayMillis: 1000 })],
+    spanProcessors: [new SimpleSpanProcessor(exporter)]
 });
 
 provider.register({
@@ -38,6 +45,8 @@ provider.register({
   }),
   // contextManager: new ZoneContextManager()
 });
+
+initWebVitals();
 
 registerInstrumentations({
   instrumentations: [
