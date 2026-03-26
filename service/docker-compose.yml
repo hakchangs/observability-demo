@@ -79,6 +79,8 @@ services:
         -Dotel.traces.exporter=otlp
         -Dotel.exporter.otlp.endpoint=http://192.168.122.46:4317
         -Dotel.exporter.otlp.protocol=grpc
+        -Dotel.instrumentation.logback-appender.experimental.capture-mdc-attributes=guid,session.id,user.id,log_category,log_type
+        -Dotel.instrumentation.logback-appender.experimental.capture-key-value-pair-attributes=true
     depends_on:
       redis:
         condition: service_healthy

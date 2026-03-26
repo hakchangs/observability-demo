@@ -27,3 +27,7 @@ spring:
     console:
       enabled: true
       path: /h2-console
+
+logging:
+  level:
+    net.kubeworks.beproduct.filter.HttpLoggingFilter: debug
