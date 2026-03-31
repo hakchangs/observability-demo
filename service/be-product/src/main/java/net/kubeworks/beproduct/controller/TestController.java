@@ -6,11 +6,7 @@ import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -139,6 +135,12 @@ public class TestController {
     public String levelDebug() {
         log.debug("print level debug...");
         return "level debug";
+    }
+
+    @GetMapping("/msg/{username}")
+    public Map<String, String> msg(@PathVariable("username") String username) {
+        log.info("print msg {}...", username);
+        return Map.of("username", username);
     }
 
 }

@@ -29,6 +29,8 @@ spring:
       path: /h2-console
 
 logging:
+#  pattern:
+#    console: "[trace=%X{trace_id:-NA}] [keyvalue=%kvp]"
   level:
     net.kubeworks.beproduct.filter.HttpLoggingFilter: debug
     net.kubeworks.beproduct.controller.TestController: debug

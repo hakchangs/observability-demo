@@ -1,5 +1,6 @@
 package net.kubeworks.beproduct.service;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import net.kubeworks.beproduct.domain.Product;
 import net.kubeworks.beproduct.repository.ProductRepository;
 import org.springframework.cache.annotation.Cacheable;
@@ -20,6 +21,7 @@ public class ProductService {
         this.kafkaTemplate = kafkaTemplate;
     }
 
+    @WithSpan
     @Cacheable("products")
     public List<Product> findAll() {
         List<Product> products = productRepository.findAll();

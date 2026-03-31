@@ -316,3 +316,13 @@ PYROSCOPE_UPLOAD_INTERVAL=15s
 - app 수준 레벨 변경: spring `logging.level.{logger}={level}` 방식 그대로 활용
 - app 수준 레벨 반영시, collector 로 넘기는 로그 데이터를 지정할 수 있음
 - app 수준에서 로그 레벨 제어권을 주어야 앱 개별적 통제가 간편하고, 레벨변경 주체를 앱에 부여할 수 있음.
+
+### Spring BE: method 단위 분할 --> java 기준 지원
+- `otel.instrumentation.methods.include` 옵션(코드변경 없음) 혹은 `@WithSpan` 어노테이션(코드변경)을 통해 지원
+- but, 패턴을 통한 메서드 적용은 안되고 메서드까지 상세하게 입력필요
+- (비교: 패턴방식 설정) 제니퍼는 관라자웹에서 메서드를 설정할 수 있고 패턴방식으로 설정도 가능하지만 otel 은 안됨.
+- (비교: 파라미터/리턴값 확인) 제니퍼는 동적으로 가능한듯하나, otel 은 코드가 들어가야만 가능함.
+
+> OTEL Java: https://opentelemetry.io/docs/zero-code/java/agent/annotations/#creating-spans-around-methods-with-otelinstrumentationmethodsinclude
+> (비교) 제니퍼 > 다이나믹 메소드 프로파일: https://jennifersoft.com/ko/blog/tech/2019-03-05/
+> (비교) 제니퍼 > 다이나믹 메소드 프로파일 설정: https://bluerainxx.tistory.com/15
