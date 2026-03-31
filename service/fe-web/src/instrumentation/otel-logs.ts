@@ -16,12 +16,12 @@ function runtimeEnv(key: string, fallback: string): string {
 const OTLP_URL = runtimeEnv('VITE_OTLP_LOGS_PATH', '/v1/logs');
 
 // 1️⃣ exporter
-const logExporter = new OTLPLogExporter({
+const exporter = new OTLPLogExporter({
     url: OTLP_URL
 });
 
 // 2️⃣ provider
-const logProvider = new LoggerProvider({
+const provider = new LoggerProvider({
     resource: new Resource({
         'service.name': runtimeEnv('VITE_SERVICE_NAME', 'fe-web'),
         'service.version': runtimeEnv('VITE_SERVICE_VERSION', '0.0.1'),
@@ -30,12 +30,12 @@ const logProvider = new LoggerProvider({
 });
 
 // 3️⃣ processor
-logProvider.addLogRecordProcessor(
-    new BatchLogRecordProcessor(logExporter)
+provider.addLogRecordProcessor(
+    new BatchLogRecordProcessor(exporter)
 );
 
 // 4️⃣ logger 생성
-const logger = logProvider.getLogger("react-console");
+const logger = provider.getLogger("react-console");
 
 // 5️⃣ 로그 전송
 logger.emit({

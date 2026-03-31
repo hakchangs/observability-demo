@@ -1,5 +1,6 @@
 import './instrumentation/otel-traces.ts';
-import './instrumentation/otel-logs.ts'
+// import './instrumentation/otel-logs.ts'
+import './instrumentation/otel-console.ts'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
