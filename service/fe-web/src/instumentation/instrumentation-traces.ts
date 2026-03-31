@@ -11,10 +11,10 @@ import { DocumentLoadInstrumentation } from '@opentelemetry/instrumentation-docu
 import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch';
 // import { UserInteractionInstrumentation } from '@opentelemetry/instrumentation-user-interaction';
 // import { ZoneContextManager } from "@opentelemetry/context-zone"
-import { getPageAttributes } from './navigation-context';
-import { getCurrentGuid } from './utils/guid';
-import { getSessionAttributes } from './utils/session';
-import { initWebVitals } from './utils/web-vitals-reporter';
+import { getPageAttributes } from '../navigation-context.ts';
+import { getCurrentGuid } from '../utils/guid.ts';
+import { getSessionAttributes } from '../utils/session.ts';
+import { initWebVitals } from '../utils/web-vitals-reporter.ts';
 
 // 런타임 주입값 우선, 미치환(${...}) 이면 Vite 빌드값으로 폴백 (로컬 dev 지원)
 function runtimeEnv(key: string, fallback: string): string {
