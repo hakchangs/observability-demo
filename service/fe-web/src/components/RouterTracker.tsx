@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { trace, SpanStatusCode } from '@opentelemetry/api';
 import { setPage, getPageAttributes } from '../navigation-context';
+import log from "loglevel"
 
 const tracer = trace.getTracer('fe-web');
 
@@ -12,6 +13,9 @@ export default function RouterTracker() {
   useEffect(() => {
     const to = location.pathname;
     setPage(to);
+
+    const logger = log.getLogger("router-tracker");
+    logger.info("route..... to=", to)
 
     if (prevPath.current === null) {
       prevPath.current = to;
