@@ -49,7 +49,7 @@ update-gitops-be-auth:
     - cd gitops
     - sed -i "s|harbor.platform.local/app/be-auth:.*|harbor.platform.local/app/be-auth:$IMAGE_TAG|g" apps/be-auth/deployment.yaml
     - git add apps/be-auth/deployment.yaml
-    - git commit -m "ci: update be-auth image to $IMAGE_TAG"
+    - 'git commit -m "ci: update be-auth image to $IMAGE_TAG"'
     - git push origin main
   tags: []
 
@@ -94,7 +94,7 @@ update-gitops-be-product:
     - cd gitops
     - sed -i "s|harbor.platform.local/app/be-product:.*|harbor.platform.local/app/be-product:$IMAGE_TAG|g" apps/be-product/deployment.yaml
     - git add apps/be-product/deployment.yaml
-    - git commit -m "ci: update be-product image to $IMAGE_TAG"
+    - 'git commit -m "ci: update be-product image to $IMAGE_TAG"'
     - git push origin main
   tags: []
 
@@ -139,7 +139,7 @@ update-gitops-be-subscription:
     - cd gitops
     - sed -i "s|harbor.platform.local/app/be-subscription:.*|harbor.platform.local/app/be-subscription:$IMAGE_TAG|g" apps/be-subscription/deployment.yaml
     - git add apps/be-subscription/deployment.yaml
-    - git commit -m "ci: update be-subscription image to $IMAGE_TAG"
+    - 'git commit -m "ci: update be-subscription image to $IMAGE_TAG"'
     - git push origin main
   tags: []
 
@@ -184,7 +184,7 @@ update-gitops-be-bff:
     - cd gitops
     - sed -i "s|harbor.platform.local/app/be-bff:.*|harbor.platform.local/app/be-bff:$IMAGE_TAG|g" apps/be-bff/deployment.yaml
     - git add apps/be-bff/deployment.yaml
-    - git commit -m "ci: update be-bff image to $IMAGE_TAG"
+    - 'git commit -m "ci: update be-bff image to $IMAGE_TAG"'
     - git push origin main
   tags: []
 
@@ -229,7 +229,7 @@ update-gitops-fe-web-nextjs:
     - cd gitops
     - sed -i "s|harbor.platform.local/app/fe-web-nextjs:.*|harbor.platform.local/app/fe-web-nextjs:$IMAGE_TAG|g" apps/fe-web-nextjs/deployment.yaml
     - git add apps/fe-web-nextjs/deployment.yaml
-    - git commit -m "ci: update fe-web-nextjs image to $IMAGE_TAG"
+    - 'git commit -m "ci: update fe-web-nextjs image to $IMAGE_TAG"'
     - git push origin main
   tags: []
 
@@ -274,6 +274,6 @@ update-gitops-be-report:
     - cd gitops
     - sed -i "s|harbor.platform.local/app/be-report:.*|harbor.platform.local/app/be-report:$IMAGE_TAG|g" apps/be-report/deployment.yaml
     - git add apps/be-report/deployment.yaml
-    - git commit -m "ci: update be-report image to $IMAGE_TAG"
+    - 'git commit -m "ci: update be-report image to $IMAGE_TAG"'
     - git push origin main
   tags: []
