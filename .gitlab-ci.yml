@@ -15,8 +15,7 @@ stages:
     - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"$HARBOR_REGISTRY\":{\"auth\":\"$(echo -n admin:Harbor12345 | base64)\"}}}" > /kaniko/.docker/config.json
     - cp /etc/ssl/certs/ca-certificates.crt /kaniko/ssl/certs/ca-certificates.crt 2>/dev/null || true
-  tags:
-    - kubernetes
+  tags: []
 
 build-be-auth:
   extends: .build-kaniko
