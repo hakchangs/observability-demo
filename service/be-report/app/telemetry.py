@@ -1,0 +1,64 @@
+import os
+import logging
+
+from opentelemetry import trace, metrics
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.semconv.resource import ResourceAttributes
+from opentelemetry._logs import set_logger_provider
+from opentelemetry.sdk._logs import LoggerProvider
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
+from opentelemetry.instrumentation.logging import LoggingInstrumentor
+
+OTLP_ENDPOINT = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4317")
+SERVICE_NAME = os.getenv("OTEL_SERVICE_NAME", "be-report")
+
+
+def setup_telemetry() -> None:
+    resource = Resource.create({
+        ResourceAttributes.SERVICE_NAME: SERVICE_NAME,
+    })
+
+    # ---- Traces ----
+    tracer_provider = TracerProvider(resource=resource)
+    tracer_provider.add_span_processor(
+        BatchSpanProcessor(
+            OTLPSpanExporter(endpoint=OTLP_ENDPOINT, insecure=True)
+        )
+    )
+    trace.set_tracer_provider(tracer_provider)
+
+    # ---- Metrics ----
+    metric_reader = PeriodicExportingMetricReader(
+        OTLPMetricExporter(endpoint=OTLP_ENDPOINT, insecure=True),
+        export_interval_millis=15_000,
+    )
+    meter_provider = MeterProvider(resource=resource, metric_readers=[metric_reader])
+    metrics.set_meter_provider(meter_provider)
+
+    # ---- Logs ----
+    logger_provider = LoggerProvider(resource=resource)
+    logger_provider.add_log_record_processor(
+        BatchLogRecordProcessor(
+            OTLPLogExporter(endpoint=OTLP_ENDPOINT, insecure=True)
+        )
+    )
+    set_logger_provider(logger_provider)
+
+    # trace_id / span_id 를 로그에 자동 주입
+    LoggingInstrumentor().instrument(set_logging_format=True)
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format=(
+            "%(asctime)s %(levelname)s [%(name)s] "
+            "[trace_id=%(otelTraceID)s span_id=%(otelSpanID)s resource.service.name=%(otelServiceName)s] "
+            "%(message)s"
+        ),
+    )
