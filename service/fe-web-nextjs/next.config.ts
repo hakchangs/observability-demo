@@ -1,7 +1,7 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-i  output: 'standalone',
+  output: 'standalone',
   async rewrites() {
     const bffUrl = process.env.BFF_URL ?? 'http://localhost:8880';
     const otelUrl = process.env.OTEL_COLLECTOR_URL ?? 'http://localhost:4318';
