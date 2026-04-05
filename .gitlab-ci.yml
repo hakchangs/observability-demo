@@ -49,7 +49,8 @@ update-gitops-be-auth:
   rules:
     - changes:
         - service/be-auth/**/*
-  needs: [build-be-auth]
+  needs:
+    - build-be-auth
   script:
     - git clone $GITOPS_REPO gitops
     - cd gitops
@@ -76,7 +77,8 @@ update-gitops-be-product:
   rules:
     - changes:
         - service/be-product/**/*
-  needs: [build-be-product]
+  needs:
+    - build-be-product
   script:
     - git clone $GITOPS_REPO gitops
     - cd gitops
@@ -103,7 +105,8 @@ update-gitops-be-subscription:
   rules:
     - changes:
         - service/be-subscription/**/*
-  needs: [build-be-subscription]
+  needs:
+    - build-be-subscription
   script:
     - git clone $GITOPS_REPO gitops
     - cd gitops
@@ -130,7 +133,8 @@ update-gitops-be-bff:
   rules:
     - changes:
         - service/be-bff/**/*
-  needs: [build-be-bff]
+  needs:
+    - build-be-bff
   script:
     - git clone $GITOPS_REPO gitops
     - cd gitops
@@ -157,7 +161,8 @@ update-gitops-fe-web-nextjs:
   rules:
     - changes:
         - service/fe-web-nextjs/**/*
-  needs: [build-fe-web-nextjs]
+  needs:
+    - build-fe-web-nextjs
   script:
     - git clone $GITOPS_REPO gitops
     - cd gitops
@@ -184,7 +189,8 @@ update-gitops-be-report:
   rules:
     - changes:
         - service/be-report/**/*
-  needs: [build-be-report]
+  needs:
+    - build-be-report
   script:
     - git clone $GITOPS_REPO gitops
     - cd gitops
