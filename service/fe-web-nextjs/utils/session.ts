@@ -4,7 +4,9 @@ let _userId = '';
 export function initSession(userId: string): void {
   let sessionId = sessionStorage.getItem('session.id');
   if (!sessionId) {
-    sessionId = crypto.randomUUID();
+    sessionId = typeof crypto?.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
     sessionStorage.setItem('session.id', sessionId);
   }
   _sessionId = sessionId;
