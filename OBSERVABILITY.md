@@ -326,3 +326,14 @@ PYROSCOPE_UPLOAD_INTERVAL=15s
 > OTEL Java: https://opentelemetry.io/docs/zero-code/java/agent/annotations/#creating-spans-around-methods-with-otelinstrumentationmethodsinclude
 > (비교) 제니퍼 > 다이나믹 메소드 프로파일: https://jennifersoft.com/ko/blog/tech/2019-03-05/
 > (비교) 제니퍼 > 다이나믹 메소드 프로파일 설정: https://bluerainxx.tistory.com/15
+
+### Nextjs FE: OTEL 설정 --> NODE_OPTIONS 에 라이브러리 주입 (K8s: Instrumentation CRD 사용)
+- `NODE_OPTIONS --requires /otel-auto-instrumentation-nodejs/autoinstrumentation.js` 환경변수 추가
+- 코드내 주입방식도 있음: 자동설정(`@vercel/otel`) or `` 수동설정
+- 수동설정시 instrumentation 빠지지 않게 잘 설정필요한듯함.
+
+> NextJS OTEL 설정: https://nextjs.org/docs/app/guides/open-telemetry
+
+### Nextjs FE: SSR-Fetch 추적연결 --> undici 지원 라이브러리 추가
+- `@opentelemetry/instrumentation-undici` 로 fetch() 추적연결
+
