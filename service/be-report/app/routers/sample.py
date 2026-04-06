@@ -8,6 +8,8 @@ logger = logging.getLogger(__name__)
 REDIS_HOST = os.getenv("REDIS_HOST", "redis-master")
 REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))
 KAFKA_BOOTSTRAP = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092")
+KAFKA_USERNAME = os.getenv("KAFKA_USERNAME", "user1")
+KAFKA_PASSWORD = os.getenv("KAFKA_PASSWORD", "plCxJVIBcH")
 SQLITE_PATH = os.getenv("SQLITE_PATH", "/tmp/be-report.db")
 
 router = APIRouter(tags=["sample"])
@@ -74,7 +76,13 @@ from aiokafka import AIOKafkaProducer
 
 @router.get("/kafka")
 async def sample_kafka():
-    producer = AIOKafkaProducer(bootstrap_servers=KAFKA_BOOTSTRAP)
+    producer = AIOKafkaProducer(
+        bootstrap_servers=KAFKA_BOOTSTRAP,
+        security_protocol="SASL_PLAINTEXT",
+        sasl_mechanism="PLAIN",
+        sasl_plain_username=KAFKA_USERNAME,
+        sasl_plain_password=KAFKA_PASSWORD,
+    )
     await producer.start()
     try:
         message = b"hello from be-report"
