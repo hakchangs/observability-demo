@@ -11,7 +11,7 @@ const exporter = new OTLPTraceExporter({
 
 const provider = new WebTracerProvider({
   resource: resourceFromAttributes({
-    'service.name': process.env.NEXT_PUBLIC_SERVICE_NAME ?? 'fe-web-nextjs',
+    'service.name': `${process.env.NEXT_PUBLIC_SERVICE_NAME ?? 'fe-web-nextjs'}-client`,
   }),
   spanProcessors: [
     new BatchSpanProcessor(exporter, { scheduledDelayMillis: 1000 }),
