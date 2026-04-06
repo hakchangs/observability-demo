@@ -335,7 +335,12 @@ PYROSCOPE_UPLOAD_INTERVAL=15s
 > NextJS OTEL 설정: https://nextjs.org/docs/app/guides/open-telemetry
 
 ### Nextjs FE: SSR-Fetch 추적연결 --> undici 지원 라이브러리 추가
-- `@opentelemetry/instrumentation-undici` 로 fetch() 추적연결
+- fetch() 호출시 아래 라이브러리로 세분화하여 추적 (SSR 대상)
+  - `next.js`
+  - `@opentelemetry/instrumentation-dns`
+  - `@opentelemetry/instrumentation-net`
+  - `@opentelemetry/instrumentation-undici`
+- CSR 로 호출한 fetch() 는 별도 설정필요함
 
 ### Python BE: logging 수집 --> logging 수집 활성화
 - logging 라이브러리가 표준적으로 사용되어 이를 지원하는 instrumentation 이 있음

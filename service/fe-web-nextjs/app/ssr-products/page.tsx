@@ -1,6 +1,7 @@
 // Server Component (no 'use client') - SSR 추적 테스트용
 import { cookies } from 'next/headers';
 import type { Product } from '../../api/products';
+import log from 'loglevel';
 
 const TYPE_LABEL: Record<string, string> = {
   LIFE: '생명보험',
@@ -17,6 +18,9 @@ const TYPE_COLOR: Record<string, string> = {
 };
 
 async function fetchProducts(): Promise<Product[]> {
+  const logger = log.getLogger('ssr-products');
+  logger.info('fetchProducts...');
+
   const cookieStore = await cookies();
   const token = cookieStore.get('token')?.value;
   const bffUrl = process.env.BFF_URL ?? 'http://localhost:8880';
