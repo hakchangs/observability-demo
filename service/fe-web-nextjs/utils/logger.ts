@@ -7,7 +7,6 @@ const SEVERITY: Record<LogLevelNames, SeverityNumber> = {
   info:  SeverityNumber.INFO,
   warn:  SeverityNumber.WARN,
   error: SeverityNumber.ERROR,
-  silent: SeverityNumber.UNSPECIFIED,
 };
 
 let patched = false;
