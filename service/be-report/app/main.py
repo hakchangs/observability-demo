@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from .routers import report
+from .routers import report, sample
 
 
 @asynccontextmanager
@@ -28,3 +28,4 @@ def health():
 
 
 app.include_router(report.router, prefix="/api/report")
+app.include_router(sample.router, prefix="/api/sample")
