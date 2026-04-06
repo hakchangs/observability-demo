@@ -27,6 +27,7 @@ registerInstrumentations({
       ignoreUrls: [
         /\/api\/otlp\//,  // OTLP export 순환 방지
         /\/_next\//,      // Next.js 정적 청크, 하이드레이션 내부 요청
+        /[?&]_rsc=/,      // RSC 청크 요청 (서버사이드에서 이미 수집)
       ],
     }),
   ],
