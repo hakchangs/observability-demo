@@ -342,6 +342,28 @@ PYROSCOPE_UPLOAD_INTERVAL=15s
   - `@opentelemetry/instrumentation-undici`
 - CSR 로 호출한 fetch() 는 별도 설정필요함
 
+### NextJS FE: logging 수집 --> 일부 라이브러리만 지원
+- pino, winston 만 자동수집 지원 (console.log, loglevel 미지원)
+- loglevel 지원방법: custom code
+  - 1) package.json 라이브러리 추가: `@opentelemetry/api-logs`
+  - 2) utils/logger.ts 추가: loglevel methodFactory custom 하여 otel 수동전송 공통처리
+  - 3) bridge 추가: instrumentation.ts(프로젝트 내부)에 loglevel 연동 설정
+    ```ts
+    export async function register() {
+      if (process.env.NEXT_RUNTIME === 'nodejs') {
+        const { setupLogBridge } = await import('./utils/logger');
+        setupLogBridge();
+      }
+    }
+    ```
+  - 4) next.config.ts 설정: 
+    - instrumentation 대상 공유설정:
+      - 설정: `serverExternalPackages: ['@opentelemetry/api-logs', 'loglevel']`
+      - 작동방식: 서버 번들 밖에 실행되는 autoinstrumentation 인스턴스와 loglevel 공유하여 사용해야함
+      - 제외대상: `@opentelemetry/api-logs` 뿐만 아니라 `loglevel` 도 제외
+    - 주의사항: serverExternalPackages 사용시 build 시점에 turbopack 사용설정됨
+      - turbopack build 시 SWC binary 필요하여 Dockerfile 에 `apk add --no-cache libc6-compat` 추가 필요
+
 ### Python BE: logging 수집 --> logging 수집 활성화
 - logging 라이브러리가 표준적으로 사용되어 이를 지원하는 instrumentation 이 있음
 - `OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true` 설정하여 수집 (기본: false)
