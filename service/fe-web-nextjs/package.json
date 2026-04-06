@@ -13,10 +13,10 @@
     "@opentelemetry/api-logs": "^0.200.0",
     "@opentelemetry/exporter-trace-otlp-http": "^0.200.0",
     "@opentelemetry/instrumentation": "^0.200.0",
-    "@opentelemetry/instrumentation-document-load": "^0.43.0",
+    "@opentelemetry/instrumentation-document-load": "^0.52.0",
     "@opentelemetry/instrumentation-fetch": "^0.200.0",
-    "@opentelemetry/resources": "^1.30.0",
-    "@opentelemetry/sdk-trace-web": "^1.30.0",
+    "@opentelemetry/resources": "^2.0.0",
+    "@opentelemetry/sdk-trace-web": "^2.0.0",
     "loglevel": "^1.9.2",
     "next": "16.1.6",
     "react": "19.2.4",
@@ -24,7 +24,7 @@
     "web-vitals": "^5.0.0"
   },
   "overrides": {
-    "@opentelemetry/sdk-trace-base": "^1.30.0"
+    "@opentelemetry/sdk-trace-base": "2.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
