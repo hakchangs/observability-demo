@@ -337,3 +337,10 @@ PYROSCOPE_UPLOAD_INTERVAL=15s
 ### Nextjs FE: SSR-Fetch 추적연결 --> undici 지원 라이브러리 추가
 - `@opentelemetry/instrumentation-undici` 로 fetch() 추적연결
 
+### Python BE: logging 수집 --> logging 수집 활성화
+- logging 라이브러리가 표준적으로 사용되어 이를 지원하는 instrumentation 이 있음
+- `OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true` 설정하여 수집 (기본: false)
+- logging 라이브러리 기본 로그레벨은 warn 으로 info 로깅은 안보이는것처럼 보일수 있음
+- 표준출력으로 나오는 로그는 uvicorn 출력으로 기본적으로 logging 수집에서 제외됨 (필요시 코드에서 설정필요)
+
+> https://opentelemetry.io/docs/zero-code/python/configuration/#logging
