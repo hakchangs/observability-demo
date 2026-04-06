@@ -1,4 +1,4 @@
-FROM harbor.platform.local/dockerhub/library/node:20-alpine AS builder
+FROM harbor.platform.local/dockerhub/library/node:20-alpine3.20 AS builder
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 COPY package.json package-lock.json ./
@@ -6,7 +6,7 @@ RUN npm ci --legacy-peer-deps
 COPY . .
 RUN npm run build && mkdir -p .next/standalone/public
 
-FROM harbor.platform.local/dockerhub/library/node:20-alpine
+FROM harbor.platform.local/dockerhub/library/node:20-alpine3.20
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=builder /app/.next/standalone ./
