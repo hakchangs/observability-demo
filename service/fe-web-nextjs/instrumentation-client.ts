@@ -24,7 +24,10 @@ registerInstrumentations({
   instrumentations: [
     new DocumentLoadInstrumentation(),
     new FetchInstrumentation({
-      ignoreUrls: [/\/api\/otlp\//],
+      ignoreUrls: [
+        /\/api\/otlp\//,  // OTLP export 순환 방지
+        /\/_next\//,      // Next.js 정적 청크, 하이드레이션 내부 요청
+      ],
     }),
   ],
 });
