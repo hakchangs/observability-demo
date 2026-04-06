@@ -8,12 +8,14 @@ from .routers import report
 
 @asynccontextmanager
 async def lifespan(app):
+    ### 로그레벨 변경: 기본=WARN
+    logging.getLogger().setLevel(logging.INFO)
+    ### uvicorn 로그 (ex. /actuator/heath 호출 로그) 출력설정
     # uvicorn sets propagate=False on its loggers by default.
     # Re-enable propagation so logs reach the OTel LoggingHandler on root logger.
-    logging.getLogger().setLevel(logging.INFO)
-    logging.getLogger("uvicorn").propagate = True
-    logging.getLogger("uvicorn.access").propagate = True
-    logging.getLogger("uvicorn.error").propagate = True
+    # logging.getLogger("uvicorn").propagate = True
+    # logging.getLogger("uvicorn.access").propagate = True
+    # logging.getLogger("uvicorn.error").propagate = True
     yield
 
 
