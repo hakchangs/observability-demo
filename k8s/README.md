@@ -8,6 +8,7 @@
 | Loki                    | -       | Distributed  | -                              | -                                                                                                                                  |
 | Tempo                   | -       | Single       | -                              | -                                                                                                                                  |
 | OpenTelemetry Collector | 0.147.0 | DaemonSet    | -                              | -                                                                                                                                  |
+| OpenTelemetry Operator  | 0.148.0 |              |                                |                                                                                                                                    |
 | kube-state-metrics      | 2.18.0  | Deployment   | -                              | -                                                                                                                                  |
 | node-exporter           | 1.10.2  | DaemonSet    |                                |                                                                                                                                    |
 | GitLab                  | 18.10.1 |              | http://gitlab.platform.local/  | root / nh9THWjOci4fb6NJcJIBBi481d9LpldZmnUAmepwPVbVrapAib5hhM3N6WB4YzLW (PAT: glpat-jBhj9ufuWNgAugeR95V4Sm86MQp1OjEH.01.0w0ynv9b0) |
@@ -184,5 +185,9 @@ GitLab 바라보는 인증서를 설정해주어야함.
 > ssl-passthrough 문제
 > - argocd 내부 백엔드에 ssl 로 전달되어 인증실패 후 리다렉트 계속 시도.
 > - helm `server.extraArgs=["--insecure"]` 로 백엔드 서버 인증 무시처리
+
+##### OTEL Operator
+> https://opentelemetry.io/docs/platforms/kubernetes/helm/operator/
+
 
 
