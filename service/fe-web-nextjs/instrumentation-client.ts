@@ -1,5 +1,3 @@
-'use client';
-
 import { WebTracerProvider, BatchSpanProcessor } from '@opentelemetry/sdk-trace-web';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { Resource } from '@opentelemetry/resources';
@@ -8,7 +6,7 @@ import { DocumentLoadInstrumentation } from '@opentelemetry/instrumentation-docu
 
 const exporter = new OTLPTraceExporter({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  url: `${(window as any).location.origin}/api/otlp/v1/traces`,
+  url: `${window.location.origin}/api/otlp/v1/traces`,
 });
 
 const provider = new WebTracerProvider({
