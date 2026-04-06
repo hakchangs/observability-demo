@@ -19,6 +19,7 @@ const TYPE_COLOR: Record<string, string> = {
 
 async function fetchProducts(): Promise<Product[]> {
   const logger = log.getLogger('ssr-products');
+  logger.setLevel("info");
   logger.info('fetchProducts...');
 
   const cookieStore = await cookies();
