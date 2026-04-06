@@ -13,7 +13,7 @@ const provider = new WebTracerProvider({
   }),
   spanProcessors: [
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    new BatchSpanProcessor(new OTLPTraceExporter({ url: '/api/otlp/v1/traces' }) as any),
+    new BatchSpanProcessor(new OTLPTraceExporter({ url: `${window.location.origin}/api/otlp/v1/traces` }) as any),
   ],
 });
 
