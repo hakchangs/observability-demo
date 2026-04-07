@@ -364,7 +364,7 @@ PYROSCOPE_UPLOAD_INTERVAL=15s
     - 주의사항: serverExternalPackages 사용시 build 시점에 turbopack 사용설정됨
       - turbopack build 시 SWC binary 필요하여 Dockerfile 에 `apk add --no-cache libc6-compat` 추가 필요
 
-### NextJS FE: Client-Side 수집연계
+### NextJS FE: Client-Side Trace 수집연계
 - 브라우저에서 실행되어 auto-instrumentation 불가 (Server-Side 와 별개로 판단하고 수집설정 필요함)
 - CSR-SSR instrumentation 격리
   - instrumentation.ts: SSR 대상으로 Next.js 에서 자동 로딩
@@ -394,6 +394,13 @@ PYROSCOPE_UPLOAD_INTERVAL=15s
     - 고려사항3. root span name(rootName): GET, HTTP GET 처럼 어떤 작업하는지 이름만으로 알수 없도록 적재됨
     - 고려사항4. Server-Side, Client-Side 혼동: service_name 이 동일하여 어디서 수행한것인지 인지하기 어려움 --> service_name 다르게 지정하면 식별이 쉬워짐
     - 고려사항5. @opentelemetry/* 라이브러리 버전 호환: 버전 불일치시 미동작 등 이상상황 발생 (특히, sdk-trace-web 1.5 vs 2.x 메이저 버전 불일치시 다른 라이브러리들과 연동동작이 원활하지 않을수 있음)
+
+### NextJS FE: Client-Side Logging 수집: Server-Side 와 분리된 logger 생성 및 전송설정
+- 1) 라이브러리 추가: otlp 전송
+  ```
+  "@opentelemetry/exporter-logs-otlp-http": "^0.200.0",
+  ```
+- 2) `instrumentation-client.ts` 로그전송 코드 추가: loggerProvider 생성 및 등록
 
 ### Python BE: logging 수집 --> logging 수집 활성화
 - logging 라이브러리가 표준적으로 사용되어 이를 지원하는 instrumentation 이 있음
