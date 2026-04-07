@@ -342,7 +342,7 @@ PYROSCOPE_UPLOAD_INTERVAL=15s
   - `@opentelemetry/instrumentation-undici`
 - CSR 로 호출한 fetch() 는 별도 설정필요함
 
-### NextJS FE: logging 수집 --> 일부 라이브러리만 지원
+### NextJS FE: Server-Side logging 수집 --> 일부 라이브러리만 지원
 - pino, winston 만 자동수집 지원 (console.log, loglevel 미지원)
 - loglevel 지원방법: custom code
   - 1) package.json 라이브러리 추가: `@opentelemetry/api-logs`
@@ -363,6 +363,37 @@ PYROSCOPE_UPLOAD_INTERVAL=15s
       - 제외대상: `@opentelemetry/api-logs` 뿐만 아니라 `loglevel` 도 제외
     - 주의사항: serverExternalPackages 사용시 build 시점에 turbopack 사용설정됨
       - turbopack build 시 SWC binary 필요하여 Dockerfile 에 `apk add --no-cache libc6-compat` 추가 필요
+
+### NextJS FE: Client-Side 수집연계
+- 브라우저에서 실행되어 auto-instrumentation 불가 (Server-Side 와 별개로 판단하고 수집설정 필요함)
+- CSR-SSR instrumentation 격리
+  - instrumentation.ts: SSR 대상으로 Next.js 에서 자동 로딩
+  - instrumentation-client.ts: CSR 대상으로 Next.js 에서 자동 로딩
+- Trace 연동 설정
+  - 1) 라이브러리 추가
+    ```text
+    # package.json
+    "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.200.0",
+    "@opentelemetry/instrumentation": "^0.200.0",
+    "@opentelemetry/instrumentation-document-load": "^0.52.0",
+    "@opentelemetry/instrumentation-fetch": "^0.200.0",
+    "@opentelemetry/resources": "^2.0.0",
+    "@opentelemetry/sdk-trace-web": "^2.0.0",
+    ```
+    - 주의: 버전문제로 trace 전송자체를 안하는 문제 있음
+    - exporter, otlp-transformer, sdk-trace-base, sdk-trace-web 충돌로 span name 설정에 오류발생하고 중단됨
+    - sdk-trace-web 기준 ^2.0.0 으로 적용필요함
+  - 2) 브라우저용 OTEL 환경변수 설정
+    - Collector 목적지 설정: `OTEL_EXPORTER_OTLP_ENDPOINT` 는 SSR 전용로 CSR 용도로 `OTEL_COLLECTOR_HTTP_URL` 추가
+    - 서비스 이름 설정: `NEXT_PUBLIC_SERVICE_NAME` 로 CSR 에서 가져올수 있는 변수 설정
+  - 3) instrumentation-client.ts 추가
+    - 코드레벨에서 직접 instrumentation 추가필요함
+    - 고려사항1. 방향성 결정: 사용자 액션 중심 추적 vs 모든 기본 Span 추적 (CSR + SSR 모두 수집할 경우 많은 데이터 적재됨) --> 사용자 액션 중심이라면 `Next-Router-Prefetch` 헤더 기준 미리 로딩하는 행위 등 제외하여 적재하는 방안이 필요함. 그외 `/_next`, `?_rsc=` 등 Next 실행방식을 고려하여 불필요한 대상은 수집제외를 고려해볼 수 있음.
+    - 고려사항2. 필터링 대상(후보): `/v1/trace`, `/actuator/health(헬스체크)`, `/_next/*(정적리소스)` --> TraceQL 제외 예제: {rootName!="GET /api/health" && rootName!="GET /actuator/health"}
+    - 고려사항3. root span name(rootName): GET, HTTP GET 처럼 어떤 작업하는지 이름만으로 알수 없도록 적재됨
+    - 고려사항4. Server-Side, Client-Side 혼동: service_name 이 동일하여 어디서 수행한것인지 인지하기 어려움 --> service_name 다르게 지정하면 식별이 쉬워짐
+    - 고려사항5. @opentelemetry/* 라이브러리 버전 호환: 버전 불일치시 미동작 등 이상상황 발생 (특히, sdk-trace-web 1.5 vs 2.x 메이저 버전 불일치시 다른 라이브러리들과 연동동작이 원활하지 않을수 있음)
 
 ### Python BE: logging 수집 --> logging 수집 활성화
 - logging 라이브러리가 표준적으로 사용되어 이를 지원하는 instrumentation 이 있음
