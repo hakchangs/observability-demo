@@ -10,8 +10,8 @@ import { type Attributes, type SpanKind, type Context } from '@opentelemetry/api
 // Sampler 레벨 필터링: span 생성 자체를 막아 traceparent 헤더 주입도 방지
 // FilteringExporter 방식은 헤더는 주입하지만 span을 보내지 않아 백엔드에서 고아 span 발생
 const IGNORE_PATTERNS = [
-  /[?&]_rsc=/,    // RSC 청크 (서버사이드에서 이미 수집)
-  /\/_next\//,    // Next.js 내부 리소스
+  // /[?&]_rsc=/,    // RSC 청크 (서버사이드에서 이미 수집)
+  /\/_next\//,    // Next.js 정적 에셋 (JS/CSS 번들 등, 추적 불필요)
 ];
 
 class FilteringSampler implements Sampler {
