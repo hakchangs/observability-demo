@@ -1,6 +1,6 @@
 export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
-    const { setupLogBridge } = await import('./utils/logger');
+    const { setupLogBridge } = await import('./utils/logger.server');
     setupLogBridge();
   }
 }

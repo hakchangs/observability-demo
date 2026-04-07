@@ -1,3 +1,4 @@
+import { setupLogBridge } from './utils/logger.client';
 import { WebTracerProvider, BatchSpanProcessor } from '@opentelemetry/sdk-trace-web';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { resourceFromAttributes } from '@opentelemetry/resources';
@@ -59,6 +60,8 @@ registerInstrumentations({
     new FetchInstrumentation(),
   ],
 });
+
+setupLogBridge();
 
 // FetchInstrumentation 등록 후 래핑해야 Sampler 호출 시점에 context 가 살아있음
 // Next-Router-Prefetch: 1 헤더가 있으면 IS_PREFETCH 플래그를 context 에 심어
