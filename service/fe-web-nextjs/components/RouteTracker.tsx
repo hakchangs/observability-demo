@@ -10,6 +10,7 @@ export default function RouteTracker() {
 
   useEffect(() => {
     const logger = log.getLogger('route-tracker');
+    logger.setLevel("info");
     logger.info('route..... to=', pathname);
 
     if (prevPath.current === null) {
