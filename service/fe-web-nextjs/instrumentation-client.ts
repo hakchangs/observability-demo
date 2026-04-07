@@ -1,4 +1,6 @@
 import { setupLogBridge } from './utils/logger.client';
+import { LoggerProvider, BatchLogRecordProcessor } from '@opentelemetry/sdk-logs';
+import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
 import { WebTracerProvider, BatchSpanProcessor } from '@opentelemetry/sdk-trace-web';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { resourceFromAttributes } from '@opentelemetry/resources';
@@ -60,6 +62,17 @@ registerInstrumentations({
     new FetchInstrumentation(),
   ],
 });
+
+// 브라우저 LoggerProvider 등록 → setupLogBridge 가 이 provider 를 통해 Loki 로 전송
+const loggerProvider = new LoggerProvider({
+  resource: provider.resource,
+});
+loggerProvider.addLogRecordProcessor(
+  new BatchLogRecordProcessor(
+    new OTLPLogExporter({ url: `${window.location.origin}/api/otlp/v1/logs` }),
+  ),
+);
+loggerProvider.register();
 
 setupLogBridge();
 
