@@ -9,6 +9,7 @@ import { DocumentLoadInstrumentation } from '@opentelemetry/instrumentation-docu
 import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch';
 import { SamplingDecision, type Sampler, type SamplingResult } from '@opentelemetry/sdk-trace-web';
 import { context, createContextKey, type Attributes, type SpanKind, type Context } from '@opentelemetry/api';
+import { logs } from '@opentelemetry/api-logs';
 
 const IGNORE_URL_PATTERNS = [
   /\/_next\//,    // Next.js 정적 에셋 (JS/CSS 번들 등, 추적 불필요)
@@ -41,11 +42,13 @@ class FilteringSampler implements Sampler {
   toString() { return 'FilteringSampler'; }
 }
 
+const resource = resourceFromAttributes({
+  'service.name': `${process.env.NEXT_PUBLIC_SERVICE_NAME ?? 'fe-web-nextjs'}-client`,
+});
+
 const provider = new WebTracerProvider({
   sampler: new FilteringSampler(),
-  resource: resourceFromAttributes({
-    'service.name': `${process.env.NEXT_PUBLIC_SERVICE_NAME ?? 'fe-web-nextjs'}-client`,
-  }),
+  resource,
   spanProcessors: [
     new BatchSpanProcessor(
       new OTLPTraceExporter({ url: `${window.location.origin}/api/otlp/v1/traces` }),
@@ -64,15 +67,13 @@ registerInstrumentations({
 });
 
 // 브라우저 LoggerProvider 등록 → setupLogBridge 가 이 provider 를 통해 Loki 로 전송
-const loggerProvider = new LoggerProvider({
-  resource: provider.resource,
-});
+const loggerProvider = new LoggerProvider({ resource });
 loggerProvider.addLogRecordProcessor(
   new BatchLogRecordProcessor(
     new OTLPLogExporter({ url: `${window.location.origin}/api/otlp/v1/logs` }),
   ),
 );
-loggerProvider.register();
+logs.setGlobalLoggerProvider(loggerProvider);
 
 setupLogBridge();
 
