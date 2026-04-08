@@ -8,6 +8,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -18,9 +20,11 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ThreadLocalRandom;
 
-@Component
-@Order(1)
+//@Component
+//@Order(1)
 public class GuidFilter extends OncePerRequestFilter {
+
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private static final DateTimeFormatter FORMATTER =
             DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
@@ -29,6 +33,9 @@ public class GuidFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain chain) throws ServletException, IOException {
+
+        logger.debug("GuidFilter start...");
+
         String guid = Baggage.current().getEntryValue("guid");
 
         try {
