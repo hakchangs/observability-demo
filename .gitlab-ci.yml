@@ -29,6 +29,8 @@ build-be-auth:
       --destination $HARBOR_REGISTRY/$HARBOR_PROJECT/be-auth:$IMAGE_TAG
       --destination $HARBOR_REGISTRY/$HARBOR_PROJECT/be-auth:latest
       --skip-tls-verify
+      --cache=true
+      --cache-repo=$HARBOR_REGISTRY/$HARBOR_PROJECT/cache-be-auth
   tags: []
 
 update-gitops-be-auth:

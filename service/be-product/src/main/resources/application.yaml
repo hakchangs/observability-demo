@@ -34,3 +34,4 @@ logging:
   level:
     net.kubeworks.beproduct.filter.HttpLoggingFilter: debug
     net.kubeworks.beproduct.controller.TestController: debug
+
