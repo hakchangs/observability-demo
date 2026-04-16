@@ -14,7 +14,7 @@ export async function register() {
 
     // K8s Operator 주입 provider는 ProxyTracerProvider로 래핑되어 있어
     // 타입 정보 없이 내부 delegate에 접근해야 함
-    const proxy = trace.getTracerProvider() as Record<string, unknown>;
+    const proxy = trace.getTracerProvider() as unknown as Record<string, unknown>;
     const provider = (
         typeof proxy['getDelegate'] === 'function'
             ? (proxy['getDelegate'] as () => unknown)()
