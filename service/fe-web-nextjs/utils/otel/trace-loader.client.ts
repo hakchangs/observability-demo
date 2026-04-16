@@ -6,7 +6,7 @@ import {DocumentLoadInstrumentation} from "@opentelemetry/instrumentation-docume
 import {FetchInstrumentation} from "@opentelemetry/instrumentation-fetch";
 import {context} from "@opentelemetry/api";
 import {IS_PREFETCH, TraceSampler} from "@/utils/otel/trace-sampler.client";
-import {generateGuid} from "@/utils/otel/guid";
+import {generateGuid, getCurrentGuid, setCurrentGuid} from "@/utils/otel/guid";
 
 const resource = resourceFromAttributes({
     'service.name': `${process.env.NEXT_PUBLIC_SERVICE_NAME ?? 'fe-web-nextjs'}-client`,
@@ -29,10 +29,11 @@ registerInstrumentations({
     instrumentations: [
         new DocumentLoadInstrumentation(),
         new FetchInstrumentation({
-            //GUID 생성 및 설정
+            //GUID 속성 설정
             clearTimingResources: true,
             applyCustomAttributesOnSpan: (span) => {
-                span.setAttribute("guid", generateGuid())
+                const guid = getCurrentGuid();
+                if (guid) span.setAttribute('guid', guid);
             }
         }),
     ],
@@ -51,5 +52,21 @@ window.fetch = function (input: RequestInfo | URL, init?: RequestInit) {
             () => instrumentedFetch(input, init),
         );
     }
-    return instrumentedFetch(input, init);
+
+    const guid = generateGuid();
+    setCurrentGuid(guid);
+
+    // GUID 전파 설정
+    // - baggage header 설정 및 전파 유도
+    // - 기존 헤더는 유지
+    headers.set("baggage", `guid=${guid}`);
+    // const headers: Record<string, string> = {
+    //     // 기존 헤더는 유지
+    //     ...(init?.headers as Record<string, string>),
+    //     "baggage": `guid=${guid}`,
+    // }
+
+    return instrumentedFetch(input, {
+        headers, ...init
+    });
 };
