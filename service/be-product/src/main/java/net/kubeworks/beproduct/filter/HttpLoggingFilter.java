@@ -25,8 +25,8 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-//@Component
-//@Order(2)
+@Component
+@Order(2)
 public class HttpLoggingFilter extends OncePerRequestFilter {
 
     private static final Logger log = LoggerFactory.getLogger(HttpLoggingFilter.class);
