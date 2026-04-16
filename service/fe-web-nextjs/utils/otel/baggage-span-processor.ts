@@ -1,4 +1,4 @@
-import {ReadableSpan, Span, SpanProcessor} from "@opentelemetry/sdk-trace-web";
+import {ReadableSpan, Span, SpanProcessor} from "@opentelemetry/sdk-trace-base";
 import {Context, propagation} from "@opentelemetry/api";
 
 // baggage 에 담긴 모든 값을 span 에 저장
