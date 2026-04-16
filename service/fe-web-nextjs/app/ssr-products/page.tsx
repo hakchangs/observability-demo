@@ -40,8 +40,9 @@ export default async function SsrProductsPage() {
   let products: Product[] = [];
   let error = '';
 
-    logger.setLevel("info");
-  logger.info('fetchProducts...');
+  const logger = log.getLogger('ssr-products');
+  logger.setLevel("info");
+  logger.info('Render SsrProducts...');
 
   try {
     products = await fetchProducts();
