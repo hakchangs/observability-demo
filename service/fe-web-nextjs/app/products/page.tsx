@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { getProducts } from '../../api/products';
 import type { Product } from '../../api/products';
 import { useAuth } from '../../components/AuthProvider';
+import log from "loglevel";
 
 const TYPE_LABEL: Record<string, string> = {
   LIFE: '생명보험',
@@ -26,6 +27,10 @@ export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  const logger = log.getLogger('products-page');
+  logger.setLevel("info");
+  logger.info("Rendering Product Page...");
 
   useEffect(() => {
     if (!auth) { router.replace('/'); return; }
