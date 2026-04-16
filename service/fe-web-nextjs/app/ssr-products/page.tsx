@@ -2,7 +2,7 @@
 import { cookies } from 'next/headers';
 import type { Product } from '../../api/products';
 import log from 'loglevel';
-import logger from "@/utils/logger";
+import logger from "@/utils/otel/logger";
 
 const TYPE_LABEL: Record<string, string> = {
   LIFE: '생명보험',
