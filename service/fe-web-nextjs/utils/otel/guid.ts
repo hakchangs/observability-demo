@@ -14,13 +14,3 @@ export function generateGuid(): string {
   const random = pad(Math.floor(Math.random() * 10_000_000_000), 10); // 10자
   return `${timestamp}${SYSTEM_CODE}${random}`;
 }
-
-let _currentGuid = '';
-
-export function setCurrentGuid(guid: string): void {
-  _currentGuid = guid;
-}
-
-export function getCurrentGuid(): string {
-  return _currentGuid;
-}
