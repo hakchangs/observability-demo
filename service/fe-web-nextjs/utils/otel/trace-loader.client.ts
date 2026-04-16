@@ -67,6 +67,6 @@ window.fetch = function (input: RequestInfo | URL, init?: RequestInit) {
     // }
 
     return instrumentedFetch(input, {
-        headers, ...init
+        ...init, headers
     });
 };
