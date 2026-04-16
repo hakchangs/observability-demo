@@ -3,7 +3,7 @@
 작업내용
 - loglevel 로 작성한 서버 로그를 수집하도록 설정
 
-> 지원 Stack: NextJS(typescript) + loglevel
+> 적용 Stack: NextJS(typescript) + loglevel
 > 참고: pino, winston 은 otel instrumentation 제공하나 log level 은 지원하지 않음.
 
 ### 샘플 코드
@@ -15,7 +15,7 @@ npm install @opentelemetry/api-logs@^0.200.0
 
 ##### 2. logger 추가
 ```ts
-// {project-root}/utils/logger.server.ts
+// @/utils/logger.server.ts
 import log, { type LogLevelNames } from 'loglevel';
 import { logs, SeverityNumber } from '@opentelemetry/api-logs';
 
@@ -57,7 +57,7 @@ export function setupLogBridge() {
 
 ##### 3. instrumentation 추가 및 logger 설정
 ```ts
-// {project-root}/instrumentation.ts
+// @/instrumentation.ts
 export async function register() {
     //server side 경우만 logger 설정
     if (process.env.NEXT_RUNTIME === 'nodejs') {
@@ -70,7 +70,7 @@ export async function register() {
 ##### 4. instrumentation 충돌방지 설정
 K8s Pod 에서 자동설정되는 auto-instrumentation 인스턴스와 loglevel 공유하여 사용하도록 설정
 ```ts
-// next.config.ts
+// @/next.config.ts
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
@@ -84,7 +84,7 @@ export default nextConfig;
 
 ##### 5. 테스트 코드 작성
 ```tsx
-// {project-root}/app/ssr-products/page.tsx
+// @/app/ssr-products/page.tsx
 // Server Component (no 'use client') - SSR 추적 테스트용
 import log from 'loglevel';
 
