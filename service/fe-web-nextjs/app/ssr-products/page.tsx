@@ -2,6 +2,7 @@
 import { cookies } from 'next/headers';
 import type { Product } from '../../api/products';
 import log from 'loglevel';
+import logger from "@/utils/logger";
 
 const TYPE_LABEL: Record<string, string> = {
   LIFE: '생명보험',
@@ -38,6 +39,8 @@ async function fetchProducts(): Promise<Product[]> {
 export default async function SsrProductsPage() {
   let products: Product[] = [];
   let error = '';
+
+  logger.info('load SsrProducts...');
 
   try {
     products = await fetchProducts();
