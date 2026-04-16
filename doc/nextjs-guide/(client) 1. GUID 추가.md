@@ -26,39 +26,72 @@ export function generateGuid(): string {
     const random = pad(Math.floor(Math.random() * 10_000_000_000), 10); // 10자
     return `${timestamp}${SYSTEM_CODE}${random}`;
 }
-
-let _currentGuid = '';
-
-export function setCurrentGuid(guid: string): void {
-    _currentGuid = guid;
-}
-
-export function getCurrentGuid(): string {
-    return _currentGuid;
-}
 ```
 
 ##### 3. 추적 정보에 추가
-Trace 설정시 생성한 trace-loader.client.ts 에 guid 생성설정 추가
+Trace 설정시 생성한 trace-loader.client.ts 에 guid 생성/전파/Span 저장 코드 추가
 
+```ts
+// @/utils/otel/baggage-span-processor.ts
+
+import {ReadableSpan, Span, SpanProcessor} from "@opentelemetry/sdk-trace-web";
+import {Context, propagation} from "@opentelemetry/api";
+
+// baggage 에 담긴 모든 값을 span 에 저장
+export class BaggageToAttributesProcessor implements SpanProcessor {
+    onStart(span: Span, parentContext: Context): void {
+        const baggage = propagation.getBaggage(parentContext);
+        baggage?.getAllEntries().forEach(([key, entry]) => {
+            span.setAttribute(`${key}`, entry.value);
+        });
+    }
+    onEnd(_span: ReadableSpan): void {}
+    forceFlush(): Promise<void> { return Promise.resolve(); }
+    shutdown(): Promise<void> { return Promise.resolve(); }
+}
+```
 ```ts
 // @/utils/otel/trace-loader.client.ts
 // - 기존 생성한 코드에 GUID 연관 코드 일부 추가
 
+import {resourceFromAttributes} from "@opentelemetry/resources";
+import {BatchSpanProcessor, WebTracerProvider} from "@opentelemetry/sdk-trace-web";
+import {OTLPTraceExporter} from "@opentelemetry/exporter-trace-otlp-http";
+import {registerInstrumentations} from "@opentelemetry/instrumentation";
+import {DocumentLoadInstrumentation} from "@opentelemetry/instrumentation-document-load";
+import {FetchInstrumentation} from "@opentelemetry/instrumentation-fetch";
+import {context, propagation} from "@opentelemetry/api";
+import {IS_PREFETCH, TraceSampler} from "@/utils/otel/trace-sampler.client";
+
 // GUID 생성기 임포트
 import {generateGuid} from "@/utils/otel/guid";
 
-// Fetch Span 에 guid 설정
+// Baggage -> Span 저장 처리기 임포트
+import {BaggageToAttributesProcessor} from "@/utils/otel/baggage-span-processor";
+
+const resource = resourceFromAttributes({
+    'service.name': `${process.env.NEXT_PUBLIC_SERVICE_NAME ?? 'fe-web-nextjs'}-client`,
+});
+
+const provider = new WebTracerProvider({
+    sampler: new TraceSampler(),
+    resource,
+    spanProcessors: [
+        // baggage 를 span attribute 로 저장
+        new BaggageToAttributesProcessor(),
+        new BatchSpanProcessor(
+            new OTLPTraceExporter({ url: `${window.location.origin}/api/otlp/v1/traces` }),
+            { scheduledDelayMillis: 1000 },
+        ),
+    ],
+});
+
+provider.register();
+
 registerInstrumentations({
     instrumentations: [
         new DocumentLoadInstrumentation(),
-        new FetchInstrumentation({
-            //GUID 생성 및 설정
-            clearTimingResources: true,
-            applyCustomAttributesOnSpan: (span) => {
-                span.setAttribute("guid", generateGuid())
-            }
-        }),
+        new FetchInstrumentation(),
     ],
 });
 
@@ -72,16 +105,13 @@ window.fetch = function (input: RequestInfo | URL, init?: RequestInit) {
         );
     }
 
-    const guid = generateGuid();
-    setCurrentGuid(guid);
-
     // GUID 전파 설정
-    // - baggage header 설정 및 전파 유도
-    headers.set("baggage", `guid=${guid}`);
+    const guid = generateGuid();
+    const baggage = propagation.createBaggage({ guid: { value: guid } });
+    const ctx = propagation.setBaggage(context.active(), baggage);
 
-    // 기존 헤더는 유지
-    return instrumentedFetch(input, {
-        ...init, headers
+    return context.with(ctx, () => {
+        return instrumentedFetch(input, {...init, headers})
     });
 };
 ```
