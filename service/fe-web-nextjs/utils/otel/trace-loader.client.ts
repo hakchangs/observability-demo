@@ -4,9 +4,10 @@ import {OTLPTraceExporter} from "@opentelemetry/exporter-trace-otlp-http";
 import {registerInstrumentations} from "@opentelemetry/instrumentation";
 import {DocumentLoadInstrumentation} from "@opentelemetry/instrumentation-document-load";
 import {FetchInstrumentation} from "@opentelemetry/instrumentation-fetch";
-import {context} from "@opentelemetry/api";
+import {context, propagation} from "@opentelemetry/api";
 import {IS_PREFETCH, TraceSampler} from "@/utils/otel/trace-sampler.client";
-import {generateGuid, getCurrentGuid, setCurrentGuid} from "@/utils/otel/guid";
+import {generateGuid} from "@/utils/otel/guid";
+import {BaggageToAttributesProcessor} from "@/utils/otel/baggage-span-processor";
 
 const resource = resourceFromAttributes({
     'service.name': `${process.env.NEXT_PUBLIC_SERVICE_NAME ?? 'fe-web-nextjs'}-client`,
@@ -16,6 +17,8 @@ const provider = new WebTracerProvider({
     sampler: new TraceSampler(),
     resource,
     spanProcessors: [
+        // baggage 를 span attribute 로 저장
+        new BaggageToAttributesProcessor(),
         new BatchSpanProcessor(
             new OTLPTraceExporter({ url: `${window.location.origin}/api/otlp/v1/traces` }),
             { scheduledDelayMillis: 1000 },
@@ -28,14 +31,7 @@ provider.register();
 registerInstrumentations({
     instrumentations: [
         new DocumentLoadInstrumentation(),
-        new FetchInstrumentation({
-            //GUID 속성 설정
-            clearTimingResources: true,
-            applyCustomAttributesOnSpan: (span) => {
-                const guid = getCurrentGuid();
-                if (guid) span.setAttribute('guid', guid);
-            }
-        }),
+        new FetchInstrumentation(),
     ],
 });
 
@@ -53,15 +49,12 @@ window.fetch = function (input: RequestInfo | URL, init?: RequestInit) {
         );
     }
 
-    const guid = generateGuid();
-    setCurrentGuid(guid);
-
     // GUID 전파 설정
-    // - baggage header 설정 및 전파 유도
-    headers.set("baggage", `guid=${guid}`);
+    const guid = generateGuid();
+    const baggage = propagation.createBaggage({ guid: { value: guid } });
+    const ctx = propagation.setBaggage(context.active(), baggage);
 
-    // 기존 헤더는 유지
-    return instrumentedFetch(input, {
-        ...init, headers
+    return context.with(ctx, () => {
+        return instrumentedFetch(input, {...init, headers})
     });
 };
