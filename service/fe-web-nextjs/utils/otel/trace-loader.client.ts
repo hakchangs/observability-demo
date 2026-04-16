@@ -6,6 +6,7 @@ import {DocumentLoadInstrumentation} from "@opentelemetry/instrumentation-docume
 import {FetchInstrumentation} from "@opentelemetry/instrumentation-fetch";
 import {context} from "@opentelemetry/api";
 import {IS_PREFETCH, TraceSampler} from "@/utils/otel/trace-sampler.client";
+import {generateGuid} from "@/utils/otel/guid";
 
 const resource = resourceFromAttributes({
     'service.name': `${process.env.NEXT_PUBLIC_SERVICE_NAME ?? 'fe-web-nextjs'}-client`,
@@ -27,7 +28,13 @@ provider.register();
 registerInstrumentations({
     instrumentations: [
         new DocumentLoadInstrumentation(),
-        new FetchInstrumentation(),
+        new FetchInstrumentation({
+            //GUID 생성 및 설정
+            clearTimingResources: true,
+            applyCustomAttributesOnSpan: (span) => {
+                span.setAttribute("guid", generateGuid())
+            }
+        }),
     ],
 });
 
