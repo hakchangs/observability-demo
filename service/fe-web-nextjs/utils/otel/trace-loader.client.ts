@@ -58,14 +58,9 @@ window.fetch = function (input: RequestInfo | URL, init?: RequestInit) {
 
     // GUID 전파 설정
     // - baggage header 설정 및 전파 유도
-    // - 기존 헤더는 유지
     headers.set("baggage", `guid=${guid}`);
-    // const headers: Record<string, string> = {
-    //     // 기존 헤더는 유지
-    //     ...(init?.headers as Record<string, string>),
-    //     "baggage": `guid=${guid}`,
-    // }
 
+    // 기존 헤더는 유지
     return instrumentedFetch(input, {
         ...init, headers
     });
