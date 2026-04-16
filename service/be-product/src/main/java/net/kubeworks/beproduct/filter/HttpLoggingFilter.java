@@ -26,7 +26,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
-@Order(2)
+@Order(2) //OTELInstrumentationFilter 보다 늦게 실행되어야 함 (낮은 우선순위)
 public class HttpLoggingFilter extends OncePerRequestFilter {
 
     private static final Logger log = LoggerFactory.getLogger(HttpLoggingFilter.class);
@@ -71,7 +71,9 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
         String body = new String(bodyBytes,
                 req.getCharacterEncoding() != null ? Charset.forName(req.getCharacterEncoding()) : StandardCharsets.UTF_8);
 
+        // http 요청 로깅: key-value pair 방식으로 로그를 기록한다.
         log.atDebug()
+                .addKeyValue("log_category", "app")
                 .addKeyValue("log_type", "http")
                 .addKeyValue("http.event", "request")
                 .addKeyValue("http.method", req.getMethod())
@@ -84,7 +86,9 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
         String body = new String(res.getContentAsByteArray(),
                 res.getCharacterEncoding() != null ? Charset.forName(res.getCharacterEncoding()) : StandardCharsets.UTF_8);
 
+        // http 응답 로깅: key-value pair 방식으로 로그를 기록한다.
         log.atDebug()
+                .addKeyValue("log_category", "app")
                 .addKeyValue("log_type", "http")
                 .addKeyValue("http.event", "response")
                 .addKeyValue("http.method", req.getMethod())
