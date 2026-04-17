@@ -8,6 +8,14 @@ export async function register() {
     const { setupLogBridge } = await import('./utils/otel/logger.server');
     setupLogBridge();
 
+    // spanProcessor 접근 가능 여부 확인
+    const { trace } = await import('@opentelemetry/api');
+    const p = trace.getTracerProvider() as any;
+    const provider = p?._delegate ?? p;
+    const spanProcessors = provider?._activeSpanProcessor?._spanProcessors;
+    console.log('[instrumentation][probe] provider:', provider?.constructor?.name);
+    console.log('[instrumentation][probe] spanProcessors:', Array.isArray(spanProcessors), spanProcessors?.length);
+
       // global fetch 패치: 모든 SSR fetch 호출에 baggage 헤더 자동 주입
       // - middleware 가 request 헤더에 주입한 baggage(guid 포함)를 next/headers 로 읽어 전달
       // - 개별 SSR 페이지/함수 수정 없이 공통 처리
