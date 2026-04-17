@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import log from "loglevel";
 
 // Edge runtime 호환 GUID 생성 (guid.ts는 Node.js 전용이므로 별도 구현)
 function generateGuid(): string {

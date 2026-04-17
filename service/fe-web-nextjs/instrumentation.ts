@@ -1,8 +1,6 @@
 //
 // 서버사이드 instrumentation 설정
 //
-import log from "loglevel";
-
 export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
 
@@ -15,19 +13,11 @@ export async function register() {
     const { BaggageToAttributesProcessor } = await import('./utils/otel/baggage-span-processor');
 
     // K8s Operator 주입 provider는 ProxyTracerProvider로 래핑되어 있어
-    // 타입 정보 없이 내부 delegate에 접근해야 함
-    const proxy = trace.getTracerProvider() as unknown as Record<string, unknown>;
-    const provider = (
-        typeof proxy['getDelegate'] === 'function'
-            ? (proxy['getDelegate'] as () => unknown)()
-            : proxy['_delegate'] ?? proxy
-    ) as Record<string, unknown> | undefined;
-
-    if (typeof provider?.['addSpanProcessor'] === 'function') {
-        console.log("instrumentation BaggageToAttributesProcessor registered...");
-        (provider['addSpanProcessor'] as (p: unknown) => void)(new BaggageToAttributesProcessor());
-    } else {
-        console.log("instrumentation addSpanProcessor not found on provider...", {provider});
-    }
+    // Record<string, unknown> 캐스팅시 prototype 메서드를 인식 못하므로 any 타입으로 접근
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const p = trace.getTracerProvider() as any;
+    const provider = p?.getDelegate?.() ?? p?._delegate ?? p;
+    provider?.addSpanProcessor?.(new BaggageToAttributesProcessor());
+    console.log('[instrumentation] BaggageToAttributesProcessor registered:', !!provider?.addSpanProcessor);
   }
 }
