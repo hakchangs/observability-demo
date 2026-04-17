@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import log from "loglevel";
 
 // Edge runtime 호환 GUID 생성 (guid.ts는 Node.js 전용이므로 별도 구현)
 function generateGuid(): string {
@@ -14,6 +15,12 @@ function generateGuid(): string {
 }
 
 export function middleware(request: NextRequest) {
+
+    const logger = log.getLogger("middleware");
+    logger.setLevel("info")
+
+    logger.info("middleware start...");
+
     const existing = request.headers.get('baggage') ?? '';
 
     // 이미 guid 있으면 그대로 통과 (클라이언트가 설정한 경우)
@@ -27,6 +34,8 @@ export function middleware(request: NextRequest) {
     // 요청 헤더에 baggage 주입 → OTel HTTP 계측이 context에 자동 추출
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set('baggage', baggage);
+
+    logger.info("middleware end...");
 
     return NextResponse.next({ request: { headers: requestHeaders } });
 }

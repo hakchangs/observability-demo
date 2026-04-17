@@ -1,6 +1,8 @@
 //
 // 서버사이드 instrumentation 설정
 //
+import log from "loglevel";
+
 export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
 
@@ -21,8 +23,13 @@ export async function register() {
             : proxy['_delegate'] ?? proxy
     ) as Record<string, unknown> | undefined;
 
+    const logger = log.getLogger("instrumentation");
+    logger.setLevel("info");
     if (typeof provider?.['addSpanProcessor'] === 'function') {
+        logger.info("instrumentation BaggageToAttributesProcessor registered...");
         (provider['addSpanProcessor'] as (p: unknown) => void)(new BaggageToAttributesProcessor());
+    } else {
+        logger.info("instrumentation addSpanProcessor not found on provider...", {provider});
     }
   }
 }
