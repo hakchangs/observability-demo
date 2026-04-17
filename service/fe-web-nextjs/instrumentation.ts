@@ -8,13 +8,22 @@ export async function register() {
     const { setupLogBridge } = await import('./utils/otel/logger.server');
     setupLogBridge();
 
-    // spanProcessor 접근 가능 여부 확인
+    // root span 캡처 processor 등록
+    // - _spanProcessors 배열에 직접 push (addSpanProcessor는 prototype 접근 문제로 동작 안함)
+    // - MultiSpanProcessor가 같은 배열 참조를 순회하므로 정상 호출됨
     const { trace } = await import('@opentelemetry/api');
+    const { captureIfRoot, releaseRootSpan } = await import('./utils/otel/root-span-store');
     const p = trace.getTracerProvider() as any;
     const provider = p?._delegate ?? p;
-    const spanProcessors = provider?._activeSpanProcessor?._spanProcessors;
-    console.log('[instrumentation][probe] provider:', provider?.constructor?.name);
-    console.log('[instrumentation][probe] spanProcessors:', Array.isArray(spanProcessors), spanProcessors?.length);
+    const spanProcessors: any[] = provider?._activeSpanProcessor?._spanProcessors;
+    if (Array.isArray(spanProcessors)) {
+        spanProcessors.push({
+            onStart(span: any) { captureIfRoot(span); },
+            onEnd(span: any)   { releaseRootSpan(span.spanContext?.().traceId); },
+            forceFlush: () => Promise.resolve(),
+            shutdown:   () => Promise.resolve(),
+        });
+    }
 
       // global fetch 패치: 모든 SSR fetch 호출에 baggage 헤더 자동 주입
       // - middleware 가 request 헤더에 주입한 baggage(guid 포함)를 next/headers 로 읽어 전달
