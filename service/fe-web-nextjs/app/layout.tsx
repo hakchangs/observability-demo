@@ -3,13 +3,21 @@ import './globals.css';
 import { AuthProvider } from '../components/AuthProvider';
 import AppLayout from '../components/AppLayout';
 import RouteTracker from '../components/RouteTracker';
+import { headers } from 'next/headers';
+import { trace } from '@opentelemetry/api';
 
 export const metadata: Metadata = {
   title: 'InsureDemo',
   description: '보험 서비스 데모',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // 모든 SSR 요청 공통: middleware가 주입한 baggage에서 guid 읽어 active span에 저장
+  const headersList = await headers();
+  const baggage = headersList.get('baggage') ?? '';
+  const guid = baggage.split(',').find(e => e.trim().startsWith('guid='))?.split('=')[1]?.trim();
+  if (guid) trace.getActiveSpan()?.setAttribute('guid', guid);
+
   return (
     <html lang="ko">
       <body>

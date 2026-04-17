@@ -2,7 +2,6 @@
 import {cookies, headers} from 'next/headers';
 import type { Product } from '../../api/products';
 import log from 'loglevel';
-import logger from "@/utils/otel/logger";
 
 const TYPE_LABEL: Record<string, string> = {
   LIFE: '생명보험',
@@ -23,9 +22,6 @@ async function fetchProducts(): Promise<Product[]> {
   logger.setLevel("info");
   logger.info('fetchProducts...');
 
-  const headerList = await headers();
-  // const baggage = headerList.get("baggage");
-
   const cookieStore = await cookies();
   const token = cookieStore.get('token')?.value;
   const bffUrl = process.env.BFF_URL ?? 'http://localhost:8880';
@@ -33,7 +29,6 @@ async function fetchProducts(): Promise<Product[]> {
     cache: 'no-store',
     headers: {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      // ...(baggage ? { baggage } : {}),
     },
   });
   if (!res.ok) throw new Error(`products fetch failed: ${res.status}`);
