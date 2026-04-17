@@ -23,13 +23,11 @@ export async function register() {
             : proxy['_delegate'] ?? proxy
     ) as Record<string, unknown> | undefined;
 
-    const logger = log.getLogger("instrumentation");
-    logger.setLevel("info");
     if (typeof provider?.['addSpanProcessor'] === 'function') {
-        logger.info("instrumentation BaggageToAttributesProcessor registered...");
+        console.log("instrumentation BaggageToAttributesProcessor registered...");
         (provider['addSpanProcessor'] as (p: unknown) => void)(new BaggageToAttributesProcessor());
     } else {
-        logger.info("instrumentation addSpanProcessor not found on provider...", {provider});
+        console.log("instrumentation addSpanProcessor not found on provider...", {provider});
     }
   }
 }

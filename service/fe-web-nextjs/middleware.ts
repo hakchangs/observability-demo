@@ -16,10 +16,7 @@ function generateGuid(): string {
 
 export function middleware(request: NextRequest) {
 
-    const logger = log.getLogger("middleware");
-    logger.setLevel("info")
-
-    logger.info("middleware start...");
+    console.log("middleware start...");
 
     const existing = request.headers.get('baggage') ?? '';
 
@@ -35,7 +32,7 @@ export function middleware(request: NextRequest) {
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set('baggage', baggage);
 
-    logger.info("middleware end...");
+    console.log("middleware end...");
 
     return NextResponse.next({ request: { headers: requestHeaders } });
 }
