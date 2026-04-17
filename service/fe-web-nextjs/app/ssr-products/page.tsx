@@ -24,7 +24,7 @@ async function fetchProducts(): Promise<Product[]> {
   logger.info('fetchProducts...');
 
   const headerList = await headers();
-  const baggage = headerList.get("baggage");
+  // const baggage = headerList.get("baggage");
 
   const cookieStore = await cookies();
   const token = cookieStore.get('token')?.value;
@@ -33,7 +33,7 @@ async function fetchProducts(): Promise<Product[]> {
     cache: 'no-store',
     headers: {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(baggage ? { baggage } : {}),
+      // ...(baggage ? { baggage } : {}),
     },
   });
   if (!res.ok) throw new Error(`products fetch failed: ${res.status}`);
