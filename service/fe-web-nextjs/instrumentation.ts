@@ -12,14 +12,21 @@ export async function register() {
     // - _spanProcessors 배열에 직접 push (addSpanProcessor는 prototype 접근 문제로 동작 안함)
     // - MultiSpanProcessor가 같은 배열 참조를 순회하므로 정상 호출됨
     const { trace } = await import('@opentelemetry/api');
-    const { captureIfRoot, releaseRootSpan } = await import('./utils/otel/root-span-store');
+    const { captureIfRoot, getRootSpan, releaseRootSpan } = await import('./utils/otel/root-span-store');
     const p = trace.getTracerProvider() as any;
     const provider = p?._delegate ?? p;
     const spanProcessors: any[] = provider?._activeSpanProcessor?._spanProcessors;
     if (Array.isArray(spanProcessors)) {
         spanProcessors.push({
             onStart(span: any) { captureIfRoot(span); },
-            onEnd(span: any)   { releaseRootSpan(span.spanContext?.().traceId); },
+            onEnd(span: any)   {
+                // root span 자신이 끝날 때만 삭제 (child span 종료 시 삭제 방지)
+                const traceId = span.spanContext?.().traceId;
+                const spanId  = span.spanContext?.().spanId;
+                if (getRootSpan(traceId)?.spanContext?.().spanId === spanId) {
+                    releaseRootSpan(traceId);
+                }
+            },
             forceFlush: () => Promise.resolve(),
             shutdown:   () => Promise.resolve(),
         });
