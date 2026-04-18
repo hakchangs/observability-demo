@@ -235,6 +235,53 @@ update-gitops-fe-web-nextjs:
     - git push origin main
   tags: []
 
+# ── fe-web ─────────────────────────────────────────────────────────────────
+build-fe-web:
+  stage: build
+  image:
+    name: harbor.platform.local/app/kaniko:debug
+    entrypoint: [""]
+  rules:
+    - changes:
+        - service/fe-web/**/*
+  before_script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"$HARBOR_REGISTRY\":{\"auth\":\"$(echo -n admin:Harbor12345 | base64)\"}}}" > /kaniko/.docker/config.json
+    - cp /etc/ssl/certs/ca-certificates.crt /kaniko/ssl/certs/ca-certificates.crt 2>/dev/null || true
+  script:
+    - >-
+      /kaniko/executor
+      --context $CI_PROJECT_DIR/service/fe-web
+      --dockerfile $CI_PROJECT_DIR/service/fe-web/Dockerfile
+      --destination $HARBOR_REGISTRY/$HARBOR_PROJECT/fe-web:$IMAGE_TAG
+      --destination $HARBOR_REGISTRY/$HARBOR_PROJECT/fe-web:latest
+      --skip-tls-verify
+      --cache=true
+      --cache-repo=$HARBOR_REGISTRY/$HARBOR_PROJECT/cache-fe-web
+  tags: []
+
+update-gitops-fe-web:
+  stage: update-gitops
+  image:
+    name: harbor.platform.local/dockerhub/library/alpine:3.19
+    entrypoint: [""]
+  rules:
+    - changes:
+        - service/fe-web/**/*
+  before_script:
+    - apk add --no-cache git
+    - git config --global user.email "ci@gitlab.platform.local"
+    - git config --global user.name "GitLab CI"
+    - git config --global http.sslVerify false
+  script:
+    - git clone $GITOPS_REPO gitops
+    - cd gitops
+    - sed -i "s|harbor.platform.local/app/fe-web:.*|harbor.platform.local/app/fe-web:$IMAGE_TAG|g" apps/fe-web/deployment.yaml
+    - git add apps/fe-web/deployment.yaml
+    - 'git commit -m "ci: update fe-web image to $IMAGE_TAG"'
+    - git push origin main
+  tags: []
+
 # ── be-report ──────────────────────────────────────────────────────────────
 build-be-report:
   stage: build
