@@ -4,6 +4,7 @@ import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
+import net.kubeworks.beproduct.legacy.LegacySender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +21,11 @@ public class TestController {
 
     private static final Logger log = LoggerFactory.getLogger(TestController.class);
     private static final Tracer tracer = GlobalOpenTelemetry.getTracer("be-product");
+    private final LegacySender legacySender;
+
+    public TestController(LegacySender legacySender) {
+        this.legacySender = legacySender;
+    }
 
     @GetMapping("/error")
     public String error(){
@@ -141,6 +147,13 @@ public class TestController {
     public Map<String, String> msg(@PathVariable("username") String username) {
         log.info("print msg {}...", username);
         return Map.of("username", username);
+    }
+
+    @PostMapping("/legacy/send")
+    public Map<String, Object> legacySend(@RequestBody String message) {
+        log.info("print legacy send...");
+        legacySender.send(message);
+        return Map.of("message", "ok");
     }
 
 }

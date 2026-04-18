@@ -1,4 +1,4 @@
-package net.kubeworks.beproduct.filter;
+package net.kubeworks.beproduct.otel;
 
 import io.opentelemetry.api.baggage.Baggage;
 import io.opentelemetry.api.trace.Span;
