@@ -6,24 +6,19 @@ import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { DocumentLoadInstrumentation } from '@opentelemetry/instrumentation-document-load';
 import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch';
 import { getCurrentGuid } from './guid.ts';
-import {runtimeEnv} from "./runtime-env-loader.ts";
-
-const OTLP_TRACES_PATH = runtimeEnv('OTEL_EXPORTER_OTLP_TRACES_PATH', `${window.location.origin}/v1/traces`);
-const SERVICE_NAME = runtimeEnv('OTEL_SERVICE_NAME', 'fe-web');
-const SERVICE_VERSION = runtimeEnv('OTEL_SERVICE_VERSION', '0.0.1');
-const DEPLOYMENT_ENVIRONMENT = runtimeEnv('OTEL_DEPLOYMENT_ENVIRONMENT_NAME', 'demo');
+import { env } from "./otel-const.ts";
 
 const provider = new WebTracerProvider({
   resource: resourceFromAttributes({
-    'service.name': SERVICE_NAME,
-    'service.version': SERVICE_VERSION,
-    'deployment.environment': DEPLOYMENT_ENVIRONMENT,
+    'service.name': env["otel.service.name"],
+    'service.version': env["otel.service.version"],
+    'deployment.environment': env["deployment.environment.name"],
   }),
   spanProcessors: [
       new BatchSpanProcessor(new OTLPTraceExporter({
-          url: OTLP_TRACES_PATH
+          url: env["otel.traces.path"],
       }), {
-          scheduledDelayMillis: 1000
+          scheduledDelayMillis: 1000,
       })
   ],
 });
