@@ -3,5 +3,5 @@ import './trace-loader';
 // import './otel-console.ts'
 // import './otel-loglevel.ts'
 
-// import {initWebVitals} from './web-vitals-reporter'
-// initWebVitals();
+import {initWebVitals} from './web-vitals-reporter'
+initWebVitals();
