@@ -38,8 +38,6 @@ provider.register({
   }),
 });
 
-// initWebVitals();
-
 registerInstrumentations({
   instrumentations: [
     new DocumentLoadInstrumentation(),
