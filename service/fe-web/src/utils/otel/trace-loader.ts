@@ -1,6 +1,6 @@
 import { WebTracerProvider, BatchSpanProcessor } from '@opentelemetry/sdk-trace-web';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import { Resource } from '@opentelemetry/resources';
+import { resourceFromAttributes } from '@opentelemetry/resources';
 import { W3CTraceContextPropagator, W3CBaggagePropagator, CompositePropagator } from '@opentelemetry/core';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { DocumentLoadInstrumentation } from '@opentelemetry/instrumentation-document-load';
@@ -14,7 +14,7 @@ const SERVICE_VERSION = runtimeEnv('OTEL_SERVICE_VERSION', '0.0.1');
 const DEPLOYMENT_ENVIRONMENT = runtimeEnv('OTEL_DEPLOYMENT_ENVIRONMENT_NAME', 'demo');
 
 const provider = new WebTracerProvider({
-  resource: new Resource({
+  resource: resourceFromAttributes({
     'service.name': SERVICE_NAME,
     'service.version': SERVICE_VERSION,
     'deployment.environment': DEPLOYMENT_ENVIRONMENT,

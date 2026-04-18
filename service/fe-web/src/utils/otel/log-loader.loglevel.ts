@@ -2,7 +2,7 @@ import log from "loglevel";
 import type { LogLevelNames } from "loglevel";
 import { SeverityNumber } from "@opentelemetry/api-logs";
 import {BatchLogRecordProcessor, LoggerProvider} from "@opentelemetry/sdk-logs";
-import {Resource} from "@opentelemetry/resources";
+import {resourceFromAttributes} from "@opentelemetry/resources";
 import {OTLPLogExporter} from "@opentelemetry/exporter-logs-otlp-http";
 import {runtimeEnv} from "./runtime-env-loader.ts";
 
@@ -20,7 +20,7 @@ const SERVICE_VERSION = runtimeEnv('OTEL_SERVICE_VERSION', '0.0.1');
 const DEPLOYMENT_ENVIRONMENT = runtimeEnv('OTEL_DEPLOYMENT_ENVIRONMENT_NAME', 'demo');
 
 const provider = new LoggerProvider({
-    resource: new Resource({
+    resource: resourceFromAttributes({
         'service.name': SERVICE_NAME,
         'service.version': SERVICE_VERSION,
         'deployment.environment': DEPLOYMENT_ENVIRONMENT,

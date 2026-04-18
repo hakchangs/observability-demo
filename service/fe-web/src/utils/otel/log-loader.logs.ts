@@ -5,7 +5,7 @@ import {
 import {
     OTLPLogExporter
 } from '@opentelemetry/exporter-logs-otlp-http';
-import { Resource } from '@opentelemetry/resources';
+import { resourceFromAttributes } from '@opentelemetry/resources';
 import {runtimeEnv} from "./runtime-env-loader.ts";
 
 const OTLP_LOGS_PATH = runtimeEnv('OTEL_EXPORTER_OTLP_LOGS_PATH', '/v1/logs');
@@ -15,7 +15,7 @@ const DEPLOYMENT_ENVIRONMENT = runtimeEnv('OTEL_DEPLOYMENT_ENVIRONMENT_NAME', 'd
 
 // 1. provider
 const provider = new LoggerProvider({
-    resource: new Resource({
+    resource: resourceFromAttributes({
         'service.name': SERVICE_NAME,
         'service.version': SERVICE_VERSION,
         'deployment.environment': DEPLOYMENT_ENVIRONMENT,
