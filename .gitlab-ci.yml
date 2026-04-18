@@ -256,8 +256,6 @@ build-fe-web:
       --destination $HARBOR_REGISTRY/$HARBOR_PROJECT/fe-web:$IMAGE_TAG
       --destination $HARBOR_REGISTRY/$HARBOR_PROJECT/fe-web:latest
       --skip-tls-verify
-      --cache=true
-      --cache-repo=$HARBOR_REGISTRY/$HARBOR_PROJECT/cache-fe-web
   tags: []
 
 update-gitops-fe-web:
