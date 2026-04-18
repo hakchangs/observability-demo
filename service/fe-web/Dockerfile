@@ -14,7 +14,7 @@ COPY nginx.conf.template /etc/nginx/nginx.conf.template
 
 # 컨테이너 시작 시 모든 환경변수를 index.html 및 nginx 설정에 주입 후 실행
 CMD ["/bin/sh", "-c", \
-    "envsubst '${VITE_SERVICE_NAME} ${VITE_SERVICE_VERSION} ${VITE_DEPLOYMENT_ENV} ${VITE_OTLP_TRACES_PATH}' \
+    "envsubst '${OTEL_SERVICE_NAME} ${OTEL_SERVICE_VERSION} ${OTEL_DEPLOYMENT_ENVIRONMENT_NAME} ${OTEL_EXPORTER_OTLP_TRACES_PATH} ${OTEL_EXPORTER_OTLP_LOGS_PATH}' \
      < /usr/share/nginx/html/index.html \
      > /tmp/index.html \
      && mv /tmp/index.html /usr/share/nginx/html/index.html \

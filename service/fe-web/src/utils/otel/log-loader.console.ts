@@ -7,31 +7,27 @@ import {
     OTLPLogExporter
 } from '@opentelemetry/exporter-logs-otlp-http';
 import {Resource} from "@opentelemetry/resources";
+import {runtimeEnv} from "./runtime-env-loader.ts";
 
-function runtimeEnv(key: string, fallback: string): string {
-    const val = (window as unknown as { __ENV__?: Record<string, string> }).__ENV__?.[key];
-    if (val && !val.startsWith('${')) return val;
-    return (import.meta.env[key] as string | undefined) ?? fallback;
-}
+const OTLP_LOGS_PATH = runtimeEnv('OTEL_EXPORTER_OTLP_LOGS_PATH', '/v1/logs');
+const SERVICE_NAME = runtimeEnv('OTEL_SERVICE_NAME', 'fe-web');
+const SERVICE_VERSION = runtimeEnv('OTEL_SERVICE_VERSION', '0.0.1');
+const DEPLOYMENT_ENVIRONMENT = runtimeEnv('OTEL_DEPLOYMENT_ENVIRONMENT_NAME', 'demo');
 
-const OTLP_URL = runtimeEnv('VITE_OTLP_LOGS_PATH', '/v1/logs');
-
-// exporter 설정
-const exporter = new OTLPLogExporter({
-    url: OTLP_URL
-});
-
-// provider 생성
 const provider = new LoggerProvider({
     resource: new Resource({
-        'service.name': runtimeEnv('VITE_SERVICE_NAME', 'fe-web'),
-        'service.version': runtimeEnv('VITE_SERVICE_VERSION', '0.0.1'),
-        'deployment.environment': runtimeEnv('VITE_DEPLOYMENT_ENV', 'demo'),
+        'service.name': SERVICE_NAME,
+        'service.version': SERVICE_VERSION,
+        'deployment.environment': DEPLOYMENT_ENVIRONMENT,
     }),
 });
 
 provider.addLogRecordProcessor(
-    new BatchLogRecordProcessor(exporter)
+    new BatchLogRecordProcessor(new OTLPLogExporter({
+        url: OTLP_LOGS_PATH
+    }), {
+        scheduledDelayMillis: 1000,
+    })
 );
 
 // logger 생성
