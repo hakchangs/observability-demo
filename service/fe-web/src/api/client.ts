@@ -1,4 +1,4 @@
-import { generateGuid, setCurrentGuid } from '../utils/guid';
+import { generateGuid, setCurrentGuid } from '../utils/otel/guid.ts';
 import { getSessionBaggage } from '../utils/session';
 
 const getToken = () => localStorage.getItem('token');

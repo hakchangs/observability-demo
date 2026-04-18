@@ -1,9 +1,9 @@
 import { onCLS, onFCP, onINP, onLCP, onTTFB } from 'web-vitals';
 import type { Metric } from 'web-vitals';
 import { context, ROOT_CONTEXT, trace } from '@opentelemetry/api';
-import { getPageAttributes } from '../navigation-context';
-import { getSessionAttributes } from './session';
-import { getCurrentGuid } from './guid';
+import { getPageAttributes } from '../../navigation-context.ts';
+import { getSessionAttributes } from '../session.ts';
+import { getCurrentGuid } from './guid.ts';
 
 const tracer = trace.getTracer('web-vitals');
 

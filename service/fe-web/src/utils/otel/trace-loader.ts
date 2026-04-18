@@ -1,20 +1,11 @@
-import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
-import {
-    // BatchSpanProcessor,
-    SimpleSpanProcessor
-} from '@opentelemetry/sdk-trace-base';
+import { WebTracerProvider, BatchSpanProcessor } from '@opentelemetry/sdk-trace-web';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { Resource } from '@opentelemetry/resources';
 import { W3CTraceContextPropagator, W3CBaggagePropagator, CompositePropagator } from '@opentelemetry/core';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { DocumentLoadInstrumentation } from '@opentelemetry/instrumentation-document-load';
 import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch';
-// import { UserInteractionInstrumentation } from '@opentelemetry/instrumentation-user-interaction';
-// import { ZoneContextManager } from "@opentelemetry/context-zone"
-import { getPageAttributes } from '../navigation-context.ts';
-import { getCurrentGuid } from '../utils/guid.ts';
-import { getSessionAttributes } from '../utils/session.ts';
-import { initWebVitals } from '../utils/web-vitals-reporter.ts';
+import { getCurrentGuid } from './guid.ts';
 
 // 런타임 주입값 우선, 미치환(${...}) 이면 Vite 빌드값으로 폴백 (로컬 dev 지원)
 function runtimeEnv(key: string, fallback: string): string {
@@ -24,39 +15,37 @@ function runtimeEnv(key: string, fallback: string): string {
 }
 
 const OTLP_URL = runtimeEnv('VITE_OTLP_TRACES_PATH', '/v1/traces');
-
-const exporter = new OTLPTraceExporter({ url: OTLP_URL });
+const SERVICE_NAME = runtimeEnv('VITE_SERVICE_NAME', 'fe-web');
+const SERVICE_VERSION = runtimeEnv('VITE_SERVICE_VERSION', '0.0.1');
+const DEPLOYMENT_ENVIRONMENT = runtimeEnv('VITE_DEPLOYMENT_ENV', 'demo');
 
 const provider = new WebTracerProvider({
   resource: new Resource({
-    'service.name': runtimeEnv('VITE_SERVICE_NAME', 'fe-web'),
-    'service.version': runtimeEnv('VITE_SERVICE_VERSION', '0.0.1'),
-    'deployment.environment': runtimeEnv('VITE_DEPLOYMENT_ENV', 'demo'),
+    'service.name': SERVICE_NAME,
+    'service.version': SERVICE_VERSION,
+    'deployment.environment': DEPLOYMENT_ENVIRONMENT,
   }),
-    // vite HMR 개발환경에서 batch 처리시 큐 소멸로 인해 누락발생
-    // - js 모듈교체로 인한 큐 소멸이라고 하며, 개발환경에서만 발생.
-  // spanProcessors: [new BatchSpanProcessor(exporter, { scheduledDelayMillis: 1000 })],
-    spanProcessors: [new SimpleSpanProcessor(exporter)]
+  spanProcessors: [
+      new BatchSpanProcessor(new OTLPTraceExporter({ url: OTLP_URL }), {
+          scheduledDelayMillis: 1000
+      })
+  ],
 });
 
 provider.register({
   propagator: new CompositePropagator({
     propagators: [new W3CTraceContextPropagator(), new W3CBaggagePropagator()],
   }),
-  // contextManager: new ZoneContextManager()
 });
 
-initWebVitals();
+// initWebVitals();
 
 registerInstrumentations({
   instrumentations: [
     new DocumentLoadInstrumentation(),
-    // new UserInteractionInstrumentation({ eventNames: ['click'] }),
     new FetchInstrumentation({
       clearTimingResources: true,
       applyCustomAttributesOnSpan: (span) => {
-        span.setAttributes(getPageAttributes());
-        span.setAttributes(getSessionAttributes());
         const guid = getCurrentGuid();
         if (guid) span.setAttribute('guid', guid);
       },
