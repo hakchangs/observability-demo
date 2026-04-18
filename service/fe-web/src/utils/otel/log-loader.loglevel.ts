@@ -14,7 +14,7 @@ const SEVERITY_MAP: Partial<Record<LogLevelNames, SeverityNumber>> = {
     error: SeverityNumber.ERROR,
 };
 
-const OTLP_LOGS_PATH = runtimeEnv('OTEL_EXPORTER_OTLP_LOGS_PATH', '/v1/logs');
+const OTLP_LOGS_PATH = runtimeEnv('OTEL_EXPORTER_OTLP_LOGS_PATH', `${window.location.origin}/v1/logs`);
 const SERVICE_NAME = runtimeEnv('OTEL_SERVICE_NAME', 'fe-web');
 const SERVICE_VERSION = runtimeEnv('OTEL_SERVICE_VERSION', '0.0.1');
 const DEPLOYMENT_ENVIRONMENT = runtimeEnv('OTEL_DEPLOYMENT_ENVIRONMENT_NAME', 'demo');
