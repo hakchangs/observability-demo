@@ -10,8 +10,11 @@ from .routers import report, sample
 @asynccontextmanager
 async def lifespan(app):
     ### 로그레벨 변경: 기본=WARN
-    logging.getLogger().setLevel(logging.INFO)
-    logging.getLogger().addFilter(BaggageLoggingFilter())
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logging.INFO)
+    baggage_filter = BaggageLoggingFilter()
+    for handler in root_logger.handlers:
+        handler.addFilter(baggage_filter)
     ### uvicorn 로그 (ex. /actuator/heath 호출 로그) 출력설정
     # uvicorn sets propagate=False on its loggers by default.
     # Re-enable propagation so logs reach the OTel LoggingHandler on root logger.
