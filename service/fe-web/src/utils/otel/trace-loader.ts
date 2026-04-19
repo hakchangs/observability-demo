@@ -35,7 +35,6 @@ provider.register({
 
 registerInstrumentations({
   instrumentations: [
-    new GuidBaggageInstrumentation(),
     new DocumentLoadInstrumentation(),
     new FetchInstrumentation({
       //TODO: 병렬처리 이상여부 확인
@@ -46,5 +45,6 @@ registerInstrumentations({
         if (guid) span.setAttribute('guid', guid);
       },
     }),
+    new GuidBaggageInstrumentation(),
   ],
 });
