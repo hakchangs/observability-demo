@@ -7,6 +7,7 @@ import { DocumentLoadInstrumentation } from '@opentelemetry/instrumentation-docu
 import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch';
 import { env } from "./otel-const.ts";
 import {GuidBaggageInstrumentation} from "./guid-baggage-instrumentation.ts";
+import {BaggageToAttributesProcessor} from "./baggage-span-processor.ts";
 
 const provider = new WebTracerProvider({
   resource: resourceFromAttributes({
@@ -15,11 +16,12 @@ const provider = new WebTracerProvider({
     'deployment.environment': env["deployment.environment.name"],
   }),
   spanProcessors: [
-      new BatchSpanProcessor(new OTLPTraceExporter({
-          url: env["otel.traces.path"],
-      }), {
-          scheduledDelayMillis: 1000,
-      })
+    new BaggageToAttributesProcessor(),
+    new BatchSpanProcessor(new OTLPTraceExporter({
+        url: env["otel.traces.path"],
+    }), {
+        scheduledDelayMillis: 1000,
+    })
   ],
 });
 
@@ -36,14 +38,14 @@ registerInstrumentations({
   instrumentations: [
     new DocumentLoadInstrumentation(),
     new FetchInstrumentation({
-      //TODO: 병렬처리 이상여부 확인
-      // - ZoneContext 검토 or fetch() override
-      clearTimingResources: true,
-      applyCustomAttributesOnSpan: (span, request) => {
-        const headers = new Headers(request?.headers);
-        const guid = headers.get("guid");
-        if (guid) span.setAttribute('guid', guid);
-      },
+      // //TODO: 병렬처리 이상여부 확인
+      // // - ZoneContext 검토 or fetch() override
+      // clearTimingResources: true,
+      // applyCustomAttributesOnSpan: (span, request) => {
+      //   const headers = new Headers(request?.headers);
+      //   const guid = headers.get("guid");
+      //   if (guid) span.setAttribute('guid', guid);
+      // },
     }),
     new GuidBaggageInstrumentation(),
   ],
