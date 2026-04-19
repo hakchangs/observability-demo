@@ -3,18 +3,22 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from .middleware.otel_baggage import BaggageLoggingFilter, BaggageToSpanMiddleware, GuidBaggageMiddleware
+from .otel.baggage import BaggageLoggingFilter, BaggageToSpanMiddleware
+from .otel.guid import GuidBaggageMiddleware
 from .routers import report, sample
 
 
 @asynccontextmanager
 async def lifespan(app):
-    ### 로그레벨 변경: 기본=WARN
+    ### logging 공통 설정
     root_logger = logging.getLogger()
+    # 로그레벨 변경: 기본=WARN
     root_logger.setLevel(logging.INFO)
     baggage_filter = BaggageLoggingFilter()
+    # root logger handler 에 필터 등록
     for handler in root_logger.handlers:
         handler.addFilter(baggage_filter)
+
     ### uvicorn 로그 (ex. /actuator/heath 호출 로그) 출력설정
     # uvicorn sets propagate=False on its loggers by default.
     # Re-enable propagation so logs reach the OTel LoggingHandler on root logger.

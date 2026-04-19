@@ -1,9 +1,7 @@
 import logging
 
-from opentelemetry import baggage, context, trace
+from opentelemetry import baggage, trace
 from starlette.types import ASGIApp, Receive, Scope, Send
-
-from .guid import generate_guid
 
 
 class BaggageLoggingFilter(logging.Filter):
@@ -13,26 +11,6 @@ class BaggageLoggingFilter(logging.Filter):
         for key, value in baggage.get_all().items():
             setattr(record, key, value)
         return True
-
-
-class GuidBaggageMiddleware:
-    """guid 없으면 생성하여 baggage 에 주입"""
-
-    def __init__(self, app: ASGIApp) -> None:
-        self.app = app
-
-    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
-        if scope["type"] == "http":
-            if not baggage.get_baggage("guid"):
-                ctx = baggage.set_baggage("guid", generate_guid())
-                token = context.attach(ctx)
-                try:
-                    await self.app(scope, receive, send)
-                finally:
-                    context.detach(token)
-                return
-
-        await self.app(scope, receive, send)
 
 
 class BaggageToSpanMiddleware:
