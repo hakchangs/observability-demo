@@ -5,7 +5,6 @@ import { W3CTraceContextPropagator, W3CBaggagePropagator, CompositePropagator } 
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { DocumentLoadInstrumentation } from '@opentelemetry/instrumentation-document-load';
 import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch';
-import { getCurrentGuid } from './guid.ts';
 import { env } from "./otel-const.ts";
 import {GuidBaggageInstrumentation} from "./guid-baggage-instrumentation.ts";
 
