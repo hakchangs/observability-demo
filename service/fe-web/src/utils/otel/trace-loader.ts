@@ -7,6 +7,7 @@ import { DocumentLoadInstrumentation } from '@opentelemetry/instrumentation-docu
 import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch';
 import { getCurrentGuid } from './guid.ts';
 import { env } from "./otel-const.ts";
+import {GuidBaggageInstrumentation} from "./guid-baggage-instrumentation.ts";
 
 const provider = new WebTracerProvider({
   resource: resourceFromAttributes({
@@ -25,14 +26,20 @@ const provider = new WebTracerProvider({
 
 provider.register({
   propagator: new CompositePropagator({
-    propagators: [new W3CTraceContextPropagator(), new W3CBaggagePropagator()],
+    propagators: [
+        new W3CTraceContextPropagator(),
+        new W3CBaggagePropagator()
+    ],
   }),
 });
 
 registerInstrumentations({
   instrumentations: [
+    new GuidBaggageInstrumentation(),
     new DocumentLoadInstrumentation(),
     new FetchInstrumentation({
+      //TODO: 병렬처리 이상여부 확인
+      // - ZoneContext 검토 or fetch() override
       clearTimingResources: true,
       applyCustomAttributesOnSpan: (span) => {
         const guid = getCurrentGuid();
