@@ -37,16 +37,7 @@ provider.register({
 registerInstrumentations({
   instrumentations: [
     new DocumentLoadInstrumentation(),
-    new FetchInstrumentation({
-      // //TODO: 병렬처리 이상여부 확인
-      // // - ZoneContext 검토 or fetch() override
-      // clearTimingResources: true,
-      // applyCustomAttributesOnSpan: (span, request) => {
-      //   const headers = new Headers(request?.headers);
-      //   const guid = headers.get("guid");
-      //   if (guid) span.setAttribute('guid', guid);
-      // },
-    }),
+    new FetchInstrumentation(),
     new GuidBaggageInstrumentation(),
   ],
 });

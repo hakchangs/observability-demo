@@ -3,7 +3,6 @@ import type { Metric } from 'web-vitals';
 import { context, ROOT_CONTEXT, trace } from '@opentelemetry/api';
 import { getPageAttributes } from '../../navigation-context.ts';
 import { getSessionAttributes } from '../session.ts';
-import { getCurrentGuid } from './guid.ts';
 
 const tracer = trace.getTracer('web-vitals');
 
@@ -19,8 +18,6 @@ function report(metric: Metric): void {
       ...getPageAttributes(),
       ...getSessionAttributes(),
     });
-    const guid = getCurrentGuid();
-    if (guid) span.setAttribute('guid', guid);
     span.end();
   });
 }
