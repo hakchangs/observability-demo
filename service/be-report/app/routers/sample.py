@@ -14,6 +14,13 @@ SQLITE_PATH = os.getenv("SQLITE_PATH", "/tmp/be-report.db")
 
 router = APIRouter(tags=["sample"])
 
+# ── PING ──────────────────────────────────────────────────────────────────────
+
+@router.get("/ping")
+async def ping():
+    logger.info("ping started...")
+    return {"ping": "pong"}
+
 
 # ── DB ──────────────────────────────────────────────────────────────────────
 
@@ -33,14 +40,6 @@ class SampleRecord(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     message: Mapped[str]
 
-
-@router.get("/ping")
-async def ping():
-    logger.info("ping started...")
-    return {"ping": "pong"}
-
-
-# ── RDB ────────────────────────────────────────────────────────────────────
 
 async def init_db():
     async with engine.begin() as conn:
