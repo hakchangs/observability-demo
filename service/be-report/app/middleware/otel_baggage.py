@@ -1,7 +1,18 @@
+import logging
+
 from opentelemetry import baggage, context, trace
 from starlette.types import ASGIApp, Receive, Scope, Send
 
 from .guid import generate_guid
+
+
+class BaggageLoggingFilter(logging.Filter):
+    """모든 log record 에 baggage 값을 자동 주입 — 공통처리"""
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        for key, value in baggage.get_all().items():
+            setattr(record, key, value)
+        return True
 
 
 class BaggageToSpanMiddleware:
