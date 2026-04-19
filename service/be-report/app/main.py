@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from .middleware.otel_baggage import BaggageLoggingFilter, BaggageToSpanMiddleware
+from .middleware.otel_baggage import BaggageLoggingFilter, BaggageToSpanMiddleware, GuidBaggageMiddleware
 from .routers import report, sample
 
 
@@ -25,7 +25,8 @@ async def lifespan(app):
 
 
 app = FastAPI(title="be-report", version="1.0.0", lifespan=lifespan)
-app.add_middleware(BaggageToSpanMiddleware)
+app.add_middleware(BaggageToSpanMiddleware)  # 2번째 실행
+app.add_middleware(GuidBaggageMiddleware)    # 1번째 실행
 
 
 @app.get("/actuator/health", tags=["health"])
