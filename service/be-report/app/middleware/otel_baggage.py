@@ -12,6 +12,7 @@ class BaggageLoggingFilter(logging.Filter):
     def filter(self, record: logging.LogRecord) -> bool:
         for key, value in baggage.get_all().items():
             setattr(record, key, value)
+            setattr(record, "test-key", "test-value")
         return True
 
 
