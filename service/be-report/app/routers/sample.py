@@ -34,6 +34,14 @@ class SampleRecord(Base):
     message: Mapped[str]
 
 
+@router.get("/ping")
+async def ping():
+    logger.info("ping started...")
+    return {"ping": "pong"}
+
+
+# ── RDB ────────────────────────────────────────────────────────────────────
+
 async def init_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
