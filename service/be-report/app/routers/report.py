@@ -16,7 +16,7 @@ router = APIRouter(tags=["report"])
 
 @router.get("/summary")
 async def get_summary():
-    logger.info("Generating summary report")
+    logger.info("Generating summary report", extra={"guid": "hardcoded-test-guid"})
 
     subscriptions = await _fetch_subscriptions()
     products = await _fetch_products()
