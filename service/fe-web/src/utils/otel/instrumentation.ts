@@ -1,10 +1,9 @@
 
 // traces 설정
-import './trace-loader';
+import './trace/trace-loader.ts';
 
 // logs 설정
-import './log-loader'
+import './log/log-loader.ts'
 
 // metrics 설정 - web-vitals
-// import {initWebVitals} from './web-vitals-reporter'
-// initWebVitals();
+// import './metric/metric-loader'

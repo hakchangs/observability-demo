@@ -15,6 +15,8 @@ export class GuidBaggageInstrumentation extends InstrumentationBase {
 
   override enable() {
     this._originalFetch = window.fetch.bind(window);
+
+    //fetch() 래핑하여 guid 생성, baggage 전파
     window.fetch = (input, init) => {
       const guid = generateGuid();
       const baggage = propagation.createBaggage({guid: {value: guid}});

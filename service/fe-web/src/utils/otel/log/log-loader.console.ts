@@ -7,7 +7,7 @@ import {
     OTLPLogExporter
 } from '@opentelemetry/exporter-logs-otlp-http';
 import {resourceFromAttributes} from "@opentelemetry/resources";
-import {runtimeEnv} from "./runtime-env-loader.ts";
+import {runtimeEnv} from "../runtime-env-loader.ts";
 
 const OTLP_LOGS_PATH = runtimeEnv('OTEL_EXPORTER_OTLP_LOGS_PATH', `${window.location.origin}/v1/logs`);
 const SERVICE_NAME = runtimeEnv('OTEL_SERVICE_NAME', 'fe-web');

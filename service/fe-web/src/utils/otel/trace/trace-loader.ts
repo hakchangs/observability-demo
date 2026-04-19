@@ -5,8 +5,8 @@ import { W3CTraceContextPropagator, W3CBaggagePropagator, CompositePropagator } 
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { DocumentLoadInstrumentation } from '@opentelemetry/instrumentation-document-load';
 import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch';
-import { env } from "./otel-const.ts";
-import {GuidBaggageInstrumentation} from "./guid-baggage-instrumentation.ts";
+import { env } from "../otel-const.ts";
+import {GuidBaggageInstrumentation} from "../custom/guid-baggage-instrumentation.ts";
 import {BaggageToAttributesProcessor} from "./baggage-span-processor.ts";
 
 const provider = new WebTracerProvider({
@@ -21,7 +21,7 @@ const provider = new WebTracerProvider({
         url: env["otel.traces.path"],
     }), {
         scheduledDelayMillis: 1000,
-    })
+    }),
   ],
 });
 
@@ -29,7 +29,7 @@ provider.register({
   propagator: new CompositePropagator({
     propagators: [
         new W3CTraceContextPropagator(),
-        new W3CBaggagePropagator()
+        new W3CBaggagePropagator(),
     ],
   }),
 });

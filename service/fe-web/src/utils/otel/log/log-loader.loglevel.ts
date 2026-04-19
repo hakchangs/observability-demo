@@ -4,7 +4,7 @@ import { SeverityNumber } from "@opentelemetry/api-logs";
 import {BatchLogRecordProcessor, LoggerProvider} from "@opentelemetry/sdk-logs";
 import {resourceFromAttributes} from "@opentelemetry/resources";
 import {OTLPLogExporter} from "@opentelemetry/exporter-logs-otlp-http";
-import {env} from "./otel-const";
+import {env} from "../otel-const.ts";
 
 const SEVERITY_MAP: Partial<Record<LogLevelNames, SeverityNumber>> = {
     trace: SeverityNumber.TRACE,
