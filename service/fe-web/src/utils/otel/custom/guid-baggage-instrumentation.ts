@@ -7,21 +7,22 @@ export class GuidBaggageInstrumentation extends InstrumentationBase {
     super('guid-baggage', '1.0.0', {});
   }
 
-  private _originalFetch?: typeof window.fetch;
+  private _originalFetch: typeof window.fetch | undefined = undefined;
 
   init() {
     return [];
   }
 
   override enable() {
-    this._originalFetch = window.fetch.bind(window);
+    const original = window.fetch.bind(window);
+    this._originalFetch = original;
 
     //fetch() 래핑하여 guid 생성, baggage 전파
     window.fetch = (input, init) => {
       const guid = generateGuid();
       const baggage = propagation.createBaggage({guid: {value: guid}});
       const ctx = propagation.setBaggage(context.active(), baggage);
-      return context.with(ctx, () => this._originalFetch!(input, init));
+      return context.with(ctx, () => original(input, init));
     }
   }
 
