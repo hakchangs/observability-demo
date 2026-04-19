@@ -94,8 +94,8 @@ class HttpLoggingMiddleware:
 
         return receive
 
-    def _parse_headers(self, raw: list) -> dict[str, str]:
-        return {k.decode(): v.decode() for k, v in raw}
+    def _parse_headers(self, raw: list) -> str:
+        return ", ".join(f"{k.decode()}={v.decode()}" for k, v in raw)
 
     def _decode(self, data: bytes) -> str:
         if not data:
