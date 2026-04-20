@@ -1,4 +1,4 @@
-# GUID 추가: Spring Guide
+### GUID 전파
 
 작업내용
 - GUID 생성/수신하고 전파 처리
@@ -6,7 +6,7 @@
 
 > 적용 Stack: spring-boot 4.x + spring-mvc + logback 
 
-### Filter 추가 예제
+#### Filter 추가 예제
 
 ##### 1. 라이브러리 추가
 ```xml
@@ -98,3 +98,64 @@ public class TestController {
 2. (Grafana) Traces > 요청한 Trace 선택 > Span Attributes > guid 확인 > 정상
 3. (Grafana) Logs > 요청한 Log 선택 > Structured Metadata > guid 확인 > 정상
 
+
+
+#### 기간계 전송
+
+##### 1. 라이브러리 추가
+```xml
+<!-- OTEL Custom 을 위한 기본 LIB -->
+<dependency>
+    <groupId>io.opentelemetry</groupId>
+    <artifactId>opentelemetry-api</artifactId>
+    <version>1.60.1</version>
+</dependency>
+```
+
+##### 2. 기간계 Sender 작성
+```java
+@Component
+public class LegacySender {
+
+    private static final Logger log = LoggerFactory.getLogger(LegacySender.class);
+
+    // Span 분리
+    @WithSpan
+    public void send(String message) {
+
+        String guid = Baggage.current().getEntryValue("guid");
+        log.info("current guid: {}", guid);
+
+        // GUID 이용하여 기간계 메시지 전송
+        log.info("send message with guid: {} with {}", message, guid);
+
+    }
+}
+```
+
+##### 3. 테스트 코드 작성
+```java
+@RestController
+@RequestMapping("/test")
+public class TestController {
+
+    private static final Logger log = LoggerFactory.getLogger(TestController.class);
+    private final LegacySender legacySender;
+
+    public TestController(LegacySender legacySender) {
+        this.legacySender = legacySender;
+    }
+    
+    @PostMapping("/legacy/send")
+    public Map<String, Object> legacySend(@RequestBody String message) {
+        log.info("print legacy send...");
+        legacySender.send(message);
+        return Map.of("message", "ok");
+    }
+}
+```
+
+##### 4. 확인
+1. curl -X POST localhost:8080/test/legacy/send -H 'Content-Type: plain/text" -d "test msg"
+2. (Grafana) Traces > 해당 추적 검색 > Span 분리여부 확인 > 정상
+3. (Grafana) Logs > 해당 로그 검색 > `LegacySender` 에서 guid 획득 및 로그 출력여부 확인 > 정상

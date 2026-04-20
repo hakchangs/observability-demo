@@ -1,4 +1,4 @@
-# GUID 추가
+### GUID 전파
 
 작업내용
 - Document Load 로 인한 SSR 페이지 호출시 GUID 전파, Span 저장처리 (페이지 신규 접근, 리로딩)

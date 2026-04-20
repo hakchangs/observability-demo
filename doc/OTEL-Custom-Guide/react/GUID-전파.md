@@ -1,4 +1,4 @@
-# GUID 추가
+### GUID 전파
 
 작업내용
 - fetch() trace 시점에 baggage, span attribute 속성으로 guid 추가

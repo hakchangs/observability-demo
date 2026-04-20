@@ -1,4 +1,4 @@
-# GUID 추가
+### GUID 전파
 
 작업내용
 - GUID baggage 전파 및 span 저장 설정

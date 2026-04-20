@@ -1,4 +1,4 @@
-# logging 유형분류
+### 유형별 Logging
 
 작업내용
 - 로그 유형에 따라 로그 레이아웃을 다르게 적용함
@@ -8,7 +8,7 @@
 
 > 적용 Stack: spring-boot 4.x + spring-mvc + logback
 
-### HTTP 요청-응답 로깅 예제
+#### HTTP 요청-응답 로깅 예제
 
 ##### 1. 라이브러리 추가
 ```xml
