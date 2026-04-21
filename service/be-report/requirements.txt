@@ -8,3 +8,9 @@ aiokafka==0.13.0
 
 # otel libs
 opentelemetry-api==1.41.0
+
+# module load test
+## error
+openai==2.24.0
+langchain==1.2.10
+langchain-core==1.2.17
