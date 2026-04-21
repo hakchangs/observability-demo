@@ -9,6 +9,9 @@ from .otel.guid import GuidBaggageMiddleware
 from .routers import report, sample
 
 
+# module error 테스트
+from .test.module_loading import AzureChatOpenAI
+
 @asynccontextmanager
 async def lifespan(app):
     ### logging 공통 설정
