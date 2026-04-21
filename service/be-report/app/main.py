@@ -9,8 +9,12 @@ from .otel.guid import GuidBaggageMiddleware
 from .routers import report, sample
 
 
+logger = logging.getLogger(__name__)
+logger.info("be-report starting...")
+
 # module error 테스트
 from .test.module_loading import AzureChatOpenAI
+
 
 @asynccontextmanager
 async def lifespan(app):
