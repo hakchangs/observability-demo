@@ -409,3 +409,50 @@ PYROSCOPE_UPLOAD_INTERVAL=15s
 - 표준출력으로 나오는 로그는 uvicorn 출력으로 기본적으로 logging 수집에서 제외됨 (필요시 코드에서 설정필요)
 
 > https://opentelemetry.io/docs/zero-code/python/configuration/#logging
+
+## 메트릭 모델링
+
+### Label 연결
+- K8s-App(Service) 사이 연결하여 서비스와 K8s 리소스간 데이터 연결(Join)
+- kube-state-metrics metric-labels-allow-list 이용하여 k8s_pod_name, service_name 레이블 연결
+
+1. pod manifest 에 `app.kubernetes.io/name` 레이블 추가
+```yaml
+labels:
+  # label 추가
+  app.kubernetes.io/name: be-auth
+spec:
+  containers:
+    - name: be-auth-container
+      env:
+        # otel service_name 입력시 label 참조하면 source of truth 설정가능
+        - name: OTEL_SERVICE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['app.kubernetes.io/name']
+```
+  - pod 에 레이블을 추가하고, kube_pod_labels 메트릭의 레이블로 입력할 기준으로 삼음
+  - 범용성을 위해 `app.kubernetes.io/name` 레이블을 기준으로 함
+
+> K8s common-labels: https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/ 
+
+2. kube-state-metrics kube_pod_labels 설정
+```yaml
+# helm values
+metricLabelsAllowlist:
+  - pods=[app.kubernetes.io/name]
+```
+  - kube_pod_labels 가 생성되고 레이블로 label_app_kubernetes_io_name 이 생성된다.
+    `kube_pod_labels { label_app_kubernetes_io_name: "be-auth" }`
+
+3. label 참조하여 관계 연결에 사용
+```promql
+# service_name 으로 변환
+sum by (service_name) (
+  label_replace(
+      kube_pod_labels {label_app_kubernetes_io_name!=""},
+      "service_name", "$1", "label_app_kubernetes_io_name", "(.+)"
+  )
+)
+```
+
