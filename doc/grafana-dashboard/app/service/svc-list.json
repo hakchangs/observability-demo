@@ -1,0 +1,350 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 3,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div>\n  <h1>Services</h1>\n  <div style=\"display:flex; gap:8px; border-bottom: 1px solid #333;\">\n    <a href=\"/d/svc-list\"\n       style=\"padding:6px 16px; color:white; text-decoration:none; border-bottom: 1px solid #ff8833;\"\n       >\n      Service List                                                                    \n    </a>                                                                              \n    <a href=\"/d/svc-graph\"\n       style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n      Service Graph                                                                   \n    </a>           \n  </div>\n</div>\n<div>",
+        "mode": "html"
+      },
+      "pluginVersion": "12.4.2",
+      "title": "",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "bfhy0zihe76rkd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "footer": {
+              "reducers": []
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Rate (req/s)"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "reqps"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Error Rate"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percentunit"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p99"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "s"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "service_name"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": false,
+                    "title": "link test",
+                    "url": "/d/svc-overview?var-service=${__value.raw}&var-cluster=${__data.fields.k8s_cluster_name}&var-namespace=${__data.fields.k8s_namespace_name}"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 24,
+        "x": 0,
+        "y": 3
+      },
+      "id": 1,
+      "options": {
+        "cellHeight": "sm",
+        "frameIndex": 0,
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": false,
+            "displayName": "service_name"
+          }
+        ]
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "bfhy0zihe76rkd"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum by (service_name, k8s_cluster_name, k8s_namespace_name) (\n  label_replace(\n      kube_pod_labels {\n        label_app_kubernetes_io_name!=\"\",\n        k8s_cluster_name=~\"$cluster\",\n        k8s_namespace_name=~\"$namespace\"\n      },\n      \"service_name\", \"$1\", \"label_app_kubernetes_io_name\", \"(.+)\"\n  )\n)",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{service_name}}",
+          "range": false,
+          "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "bfhy0zihe76rkd"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum by (service_name, k8s_cluster_name, k8s_namespace_name) (                                                           \n    rate({\n        __name__=~\"http_server_request_duration_seconds_count|http_server_duration_milliseconds_count\",\n        service_name=~\".+\",\n        k8s_cluster_name=~\"$cluster\",\n        k8s_namespace_name=~\"$namespace\"\n    }[5m])\n)",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{service_name}}",
+          "range": false,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "bfhy0zihe76rkd"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum by (service_name, k8s_cluster_name, k8s_namespace_name) (\n    rate({\n        __name__=~\"http_server_request_duration_seconds_count|http_server_duration_milliseconds_count\",\n        service_name=~\".+\",\n        http_response_status_code=~\"5..\",\n        k8s_cluster_name=~\"$cluster\",\n        k8s_namespace_name=~\"$namespace\"\n    }[5m])                                                                            \n)\n/                                                                                   \nsum by (service_name) (                                                           \n    rate(http_server_request_duration_seconds_count{service_name=~\".+\"}[5m])\n)",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "bfhy0zihe76rkd"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "(\n  histogram_quantile(0.99,\n    sum by (service_name, le, k8s_cluster_name, k8s_namespace_name) (\n      rate(http_server_request_duration_seconds_bucket{\n        service_name=~\".+\",\n        k8s_cluster_name=~\"$cluster\",\n        k8s_namespace_name=~\"$namespace\"\n      }[5m])\n    )\n  )\n)\nor\n(\n  histogram_quantile(0.99,\n    sum by (service_name, le, k8s_cluster_name, k8s_namespace_name) (\n      rate(http_server_duration_milliseconds_bucket{\n        service_name=~\".+\",\n        k8s_cluster_name=~\"$cluster\",\n        k8s_namespace_name=~\"$namespace\"\n      }[5m])\n    )\n  ) / 1000\n)",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "C"
+        }
+      ],
+      "title": "",
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "filterByValue",
+          "options": {
+            "filters": [
+              {
+                "config": {
+                  "id": "isNotNull",
+                  "options": {}
+                },
+                "fieldName": "service_name"
+              },
+              {
+                "config": {
+                  "id": "isNotNull",
+                  "options": {}
+                },
+                "fieldName": "Value #D"
+              }
+            ],
+            "match": "all",
+            "type": "include"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Value": true,
+              "Value #C": false,
+              "Value #D": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {
+              "Time": "",
+              "Value #A": "Rate (req/s)",
+              "Value #B": "Error Rate",
+              "Value #C": "Duration (p99)",
+              "Value #D": "(kube_pod_labels) Count",
+              "k8s_cluster_name": "Cluster",
+              "k8s_namespace_name": "Namespace",
+              "service_name": "Service"
+            }
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "table"
+    }
+  ],
+  "preload": false,
+  "schemaVersion": 42,
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "allValue": ".*",
+        "current": {
+          "text": [
+            "dev"
+          ],
+          "value": [
+            "dev"
+          ]
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "bfhy0zihe76rkd"
+        },
+        "definition": "label_values(kube_pod_labels,k8s_cluster_name)",
+        "includeAll": true,
+        "multi": true,
+        "name": "cluster",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(kube_pod_labels,k8s_cluster_name)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "regexApplyTo": "value",
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "text": [
+            "app"
+          ],
+          "value": [
+            "app"
+          ]
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "bfhy0zihe76rkd"
+        },
+        "definition": "label_values(kube_pod_labels{k8s_cluster_name=~\"$cluster\"},k8s_namespace_name)",
+        "includeAll": true,
+        "multi": true,
+        "name": "namespace",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(kube_pod_labels{k8s_cluster_name=~\"$cluster\"},k8s_namespace_name)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "regexApplyTo": "value",
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Service List",
+  "uid": "svc-list",
+  "version": 2,
+  "weekStart": ""
+}

@@ -1,0 +1,678 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div>\n  <h1>Services</h1>\n  <div style=\"display:flex; gap:8px; border-bottom: 1px solid #333;\">\n    <a href=\"/d/svc-overview?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Overview\n    </a>\n    <a href=\"/d/svc-metric?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Metrics\n    </a>\n    <a href=\"/d/svc-log?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Logs\n    </a>                                                                            \n    <a href=\"/d/svc-trace?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Traces\n    </a>\n    <a href=\"/d/svc-trace-http?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        HTTP\n    </a>\n    <a href=\"/d/svc-trace-db?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        DB\n    </a>\n    <a href=\"/d/svc-trace-messaging?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Messaging\n    </a>\n    <a href=\"/d/svc-metric-jvm?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        JVM\n    </a>\n    <a href=\"/d/svc-metric-python?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Python\n    </a>\n    <a href=\"/d/svc-metric-nodejs?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:white; text-decoration:none; border-bottom: 1px solid #ff8833;\">\n        NodeJS\n    </a>\n  </div>\n</div>",
+        "mode": "html"
+      },
+      "pluginVersion": "12.4.2",
+      "title": "",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "bfhy0zihe76rkd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 85
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 0,
+        "y": 3
+      },
+      "id": 10,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "bfhy0zihe76rkd"
+          },
+          "editorMode": "code",
+          "expr": "(\n    sum({\n        __name__=\"v8js_memory_heap_used_bytes\",\n        service_name=\"$service\"\n    })\n    /\n    sum({\n        __name__=\"v8js_memory_heap_limit_bytes\",\n        service_name=\"$service\"\n    })\n) * 100",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Heap Memory Usage",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "bfhy0zihe76rkd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Memory",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "showValues": false,
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 10,
+        "x": 4,
+        "y": 3
+      },
+      "id": 12,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max",
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "width": 350
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "bfhy0zihe76rkd"
+          },
+          "editorMode": "code",
+          "expr": "sum({\n    __name__=\"v8js_memory_heap_used_bytes\",\n    service_name=\"$service\"\n})",
+          "legendFormat": "Heap Used",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "bfhy0zihe76rkd"
+          },
+          "editorMode": "code",
+          "expr": "sum({\n    __name__=\"v8js_memory_heap_limit_bytes\",\n    service_name=\"$service\"\n})",
+          "legendFormat": "Heap Limit",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "bfhy0zihe76rkd"
+          },
+          "editorMode": "code",
+          "expr": "sum({\n    __name__=\"v8js_memory_heap_space_physical_size_bytes\",\n    service_name=\"$service\"\n})",
+          "legendFormat": "Physical Size",
+          "range": true,
+          "refId": "C"
+        }
+      ],
+      "title": "Memory Usage Over Time",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "bfhy0zihe76rkd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Duration",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "showValues": false,
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 10,
+        "x": 14,
+        "y": 3
+      },
+      "id": 14,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "width": 350
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "bfhy0zihe76rkd"
+          },
+          "editorMode": "code",
+          "expr": "rate({\n    __name__=\"v8js_gc_duration_seconds_sum\",\n    service_name=\"$service\"\n}[5m])\n/\nrate({\n    __name__=\"v8js_gc_duration_seconds_count\",\n    service_name=\"$service\"\n}[5m])",
+          "legendFormat": "Avg GC Duration",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "bfhy0zihe76rkd"
+          },
+          "editorMode": "code",
+          "expr": "rate({\n    __name__=\"v8js_gc_duration_seconds_count\",\n    service_name=\"$service\"\n}[5m])",
+          "legendFormat": "GC Frequency",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "Garbage Collection Metrics",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "bfhy0zihe76rkd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": 1,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "yellow",
+                "value": 0.7
+              },
+              {
+                "color": "red",
+                "value": 0.9
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 0,
+        "y": 9
+      },
+      "id": 11,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "bfhy0zihe76rkd"
+          },
+          "editorMode": "code",
+          "expr": "{\n    __name__=\"nodejs_eventloop_utilization_ratio\",\n    service_name=\"$service\"\n}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Event Loop Utilization",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "bfhy0zihe76rkd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Delay",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 15,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "showValues": false,
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "yellow",
+                "value": 0.05
+              },
+              {
+                "color": "red",
+                "value": 0.1
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 10,
+        "x": 4,
+        "y": 9
+      },
+      "id": 13,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "width": 350
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "bfhy0zihe76rkd"
+          },
+          "editorMode": "code",
+          "expr": "{\n    __name__=\"nodejs_eventloop_delay_p50_seconds\",\n    service_name=\"$service\"\n}",
+          "legendFormat": "p50",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "bfhy0zihe76rkd"
+          },
+          "editorMode": "code",
+          "expr": "{\n    __name__=\"nodejs_eventloop_delay_p90_seconds\",\n    service_name=\"$service\"\n}",
+          "legendFormat": "p90",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "bfhy0zihe76rkd"
+          },
+          "editorMode": "code",
+          "expr": "{\n    __name__=\"nodejs_eventloop_delay_p99_seconds\",\n    service_name=\"$service\"\n}",
+          "legendFormat": "p99",
+          "range": true,
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "bfhy0zihe76rkd"
+          },
+          "editorMode": "code",
+          "expr": "{\n    __name__=\"nodejs_eventloop_delay_max_seconds\",\n    service_name=\"$service\"\n}",
+          "legendFormat": "max",
+          "range": true,
+          "refId": "D"
+        }
+      ],
+      "title": "Event Loop Delay (CPU Pressure Indicator)",
+      "type": "timeseries"
+    }
+  ],
+  "preload": false,
+  "refresh": "5s",
+  "schemaVersion": 42,
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "dev",
+          "value": "dev"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "bfhy0zihe76rkd"
+        },
+        "definition": "label_values(kube_pod_labels,k8s_cluster_name)",
+        "name": "cluster",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(kube_pod_labels,k8s_cluster_name)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "regexApplyTo": "value",
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "app",
+          "value": "app"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "bfhy0zihe76rkd"
+        },
+        "definition": "label_values(kube_pod_labels{k8s_cluster_name=\"$cluster\"},k8s_namespace_name)",
+        "name": "namespace",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(kube_pod_labels{k8s_cluster_name=\"$cluster\"},k8s_namespace_name)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "regexApplyTo": "value",
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "be-product",
+          "value": "be-product"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "bfhy0zihe76rkd"
+        },
+        "definition": "query_result(sum by (service_name)(  label_replace(    kube_pod_labels {      label_app_kubernetes_io_name!=\"\",      k8s_cluster_name=\"$cluster\",      k8s_namespace_name=\"$namespace\"    },    \"service_name\", \"$1\", \"label_app_kubernetes_io_name\", \"(.+)\"     )))",
+        "label": "service",
+        "name": "service",
+        "options": [],
+        "query": {
+          "qryType": 3,
+          "query": "query_result(sum by (service_name)(  label_replace(    kube_pod_labels {      label_app_kubernetes_io_name!=\"\",      k8s_cluster_name=\"$cluster\",      k8s_namespace_name=\"$namespace\"    },    \"service_name\", \"$1\", \"label_app_kubernetes_io_name\", \"(.+)\"     )))",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "/service_name=\"(?<text>[^\"]+)/g",
+        "regexApplyTo": "value",
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "text": "All",
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "bfhy0zihe76rkd"
+        },
+        "definition": "query_result(sum by (k8s_pod_name, k8s_namespace_name, k8s_cluster_uid)(  kube_pod_info {    k8s_pod_name!=\"\",    k8s_namespace_name=\"$namespace\",    k8s_cluster_name=\"$cluster\"  })* on(k8s_pod_name) group_left(pod) kube_pod_labels {  label_app_kubernetes_io_name=\"$service\"})",
+        "includeAll": true,
+        "multi": true,
+        "name": "pod",
+        "options": [],
+        "query": {
+          "qryType": 3,
+          "query": "query_result(sum by (k8s_pod_name, k8s_namespace_name, k8s_cluster_uid)(  kube_pod_info {    k8s_pod_name!=\"\",    k8s_namespace_name=\"$namespace\",    k8s_cluster_name=\"$cluster\"  })* on(k8s_pod_name) group_left(pod) kube_pod_labels {  label_app_kubernetes_io_name=\"$service\"})",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "/k8s_pod_name=\"(?<text>[^\"]+)/g",
+        "regexApplyTo": "value",
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-5m",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Service Details > NodeJS",
+  "uid": "svc-metric-nodejs",
+  "version": 13,
+  "weekStart": ""
+}

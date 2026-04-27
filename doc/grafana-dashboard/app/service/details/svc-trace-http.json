@@ -1,0 +1,817 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div>\n  <h1>Services</h1>\n  <div style=\"display:flex; gap:8px; border-bottom: 1px solid #333;\">\n    <a href=\"/d/svc-overview?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Overview\n    </a>\n    <a href=\"/d/svc-metric?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Metrics\n    </a>\n    <a href=\"/d/svc-log?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Logs\n    </a>                                                                            \n    <a href=\"/d/svc-trace?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Traces\n    </a>\n    <a href=\"/d/svc-trace-http?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:white; text-decoration:none; border-bottom: 1px solid #ff8833;\">\n        HTTP\n    </a>\n    <a href=\"/d/svc-trace-db?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        DB\n    </a>\n    <a href=\"/d/svc-trace-messaging?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Messaging\n    </a>\n    <a href=\"/d/svc-metric-jvm?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        JVM\n    </a>\n    <a href=\"/d/svc-metric-python?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Python\n    </a>\n    <a href=\"/d/svc-metric-nodejs?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        NodeJS\n    </a>\n  </div>\n</div>",
+        "mode": "html"
+      },
+      "pluginVersion": "12.4.2",
+      "title": "",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "bfhy0zihe76rkd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 5,
+        "x": 0,
+        "y": 3
+      },
+      "id": 4,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "sortBy": "Name",
+          "sortDesc": false,
+          "width": 180
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "sum by (http_route) (\n  rate({\n  __name__=~\"http_server_request_duration_seconds_count|\",\n    service_name=~\"$service\",\n    http_route!~\"/actuator/health|/api/health\",\n    k8s_cluster_name=~\"$cluster\",\n    k8s_namespace_name=~\"$namespace\"\n  }[$__rate_interval])\n)\nor\nsum by (http_target) (\n  rate({\n    __name__=~\"http_server_duration_milliseconds_count\",\n    service_name=~\"$service\",\n    http_target!~\"/actuator/health|/api/health\",\n    k8s_cluster_name=~\"$cluster\",\n    k8s_namespace_name=~\"$namespace\"\n  }[$__rate_interval])\n)",
+          "legendFormat": "{{http_route}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "요청수신 (by.URI)",
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "cfi0zwvte1x4wa"
+      },
+      "description": "HTTP 수신기반 추적\n- Duration 임계치: 1500ms",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "footer": {
+              "reducers": []
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Start time"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 158
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Span ID"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 185
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Span Name"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 196
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "Trace 확인",
+                    "url": "/explore?left={\"datasource\":\"cfi0zwvte1x4wa\",\"queries\":[{\"query\":\"${__data.fields.traceIdHidden}\",\"queryType\":\"traceql\",\"datasource\":{\"uid\":\"cfi0zwvte1x4wa\"}}],\"panelsState\":{\"trace\":{\"spanId\":\"${__data.fields.SpanID}\"}}}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "HTTP Method"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 121
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "HTTP URI"
+            },
+            "properties": [
+              {
+                "id": "custom.width"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Duration"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 185
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "basic",
+                  "type": "gauge",
+                  "valueDisplayMode": "text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "red",
+                      "value": 1500000000
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "SpanID"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 144
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "HTTP Status"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 98
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "applyToRow": false,
+                  "mode": "gradient",
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "from": 200,
+                      "result": {
+                        "color": "transparent",
+                        "index": 0
+                      },
+                      "to": 399
+                    },
+                    "type": "range"
+                  },
+                  {
+                    "options": {
+                      "from": 400,
+                      "result": {
+                        "color": "yellow",
+                        "index": 1
+                      },
+                      "to": 499
+                    },
+                    "type": "range"
+                  },
+                  {
+                    "options": {
+                      "from": 500,
+                      "result": {
+                        "color": "red",
+                        "index": 2
+                      }
+                    },
+                    "type": "range"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 18,
+        "w": 19,
+        "x": 5,
+        "y": 3
+      },
+      "id": 3,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "cfi0zwvte1x4wa"
+          },
+          "filters": [
+            {
+              "id": "40e83fc2",
+              "isCustomValue": false,
+              "operator": "=~",
+              "scope": "span",
+              "tag": "http.request.method",
+              "value": [
+                "$http_method"
+              ],
+              "valueType": "string"
+            },
+            {
+              "id": "service-name",
+              "isCustomValue": false,
+              "operator": "=",
+              "scope": "resource",
+              "tag": "service.name",
+              "value": [
+                "$service"
+              ],
+              "valueType": "string"
+            },
+            {
+              "id": "3436a1be",
+              "isCustomValue": false,
+              "operator": "=~",
+              "scope": "span",
+              "tag": "http.route",
+              "value": [
+                "$http_url"
+              ],
+              "valueType": "string"
+            },
+            {
+              "id": "span-name",
+              "isCustomValue": false,
+              "operator": "!=",
+              "scope": "span",
+              "tag": "name",
+              "value": [
+                "GET /actuator/health"
+              ],
+              "valueType": "string"
+            }
+          ],
+          "limit": 2000,
+          "metricsQueryType": "range",
+          "query": "{\n  resource.service.name=\"$service\"\n  && (span.http.request.method=~\"$http_method\" || span.http.method=~\"$http_method\")\n  && (span.http.route=~\"$http_url\" || span.http.target=~\"$http_url\")\n  && name!=\"GET /actuator/health\" && name!=\"GET /api/health\"\n} | select(span.http.response.status_code)",
+          "queryType": "traceql",
+          "refId": "A",
+          "serviceMapUseNativeHistograms": false,
+          "tableType": "spans"
+        }
+      ],
+      "title": "HTTP 요청 추적",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Name": false,
+              "Span ID": false,
+              "Trace Name": true,
+              "Trace Service": true,
+              "service.name": true
+            },
+            "includeByName": {},
+            "indexByName": {
+              "Duration": 4,
+              "Name": 9,
+              "Span ID": 8,
+              "Start time": 3,
+              "Trace Name": 7,
+              "Trace Service": 6,
+              "http.request.method": 0,
+              "http.response.status_code": 2,
+              "http.route": 1,
+              "service.name": 10,
+              "traceIdHidden": 5
+            },
+            "orderBy": [],
+            "orderByMode": "manual",
+            "renameByName": {
+              "Duration": "",
+              "Name": "Span Name",
+              "Span ID": "SpanID",
+              "http.request.method": "HTTP Method",
+              "http.response.status_code": "HTTP Status",
+              "http.route": "HTTP URI",
+              "service.name": ""
+            }
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "bfhy0zihe76rkd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 5,
+        "x": 0,
+        "y": 9
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "sortBy": "Name",
+          "sortDesc": false,
+          "width": 180
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "sum by (http_route) ({\n  __name__=~\"http_server_request_duration_seconds_count\",\n  service_name=~\"$service\",\n  http_route!=\"/actuator/health\",\n  http_response_status_code=~\"5.*\",\n  k8s_cluster_name=~\"$cluster\",\n  k8s_namespace_name=~\"$namespace\"\n})",
+          "legendFormat": "{{http_route}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "에러응답 (by.URI)",
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "bfhy0zihe76rkd"
+      },
+      "description": "응답시간 > 1500ms\n(임시로 10ms 설정함)",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 5,
+        "x": 0,
+        "y": 15
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "sortBy": "Name",
+          "sortDesc": false,
+          "width": 180
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum by (http_route) (\n  rate(http_server_request_duration_seconds_count{\n    service_name=~\"$service\",\n    http_route!=\"/actuator/health\",\n    k8s_cluster_name=~\"$cluster\",\n    k8s_namespace_name=~\"$namespace\"\n  }[5m])\n)\n-\nsum by (http_route) (\n  rate(http_server_request_duration_seconds_bucket{\n    service_name=~\"$service\",\n    le=\"0.01\", # 지연응답 기준(seconds)\n    http_route!=\"/actuator/health\",\n    k8s_cluster_name=~\"$cluster\",\n    k8s_namespace_name=~\"$namespace\"\n  }[5m])\n)",
+          "legendFormat": "{{http_route}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "지연응답 (by.URI)",
+      "transparent": true,
+      "type": "timeseries"
+    }
+  ],
+  "preload": false,
+  "schemaVersion": 42,
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "dev",
+          "value": "dev"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "bfhy0zihe76rkd"
+        },
+        "definition": "label_values(kube_pod_labels,k8s_cluster_name)",
+        "name": "cluster",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(kube_pod_labels,k8s_cluster_name)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "regexApplyTo": "value",
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "app",
+          "value": "app"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "bfhy0zihe76rkd"
+        },
+        "definition": "label_values(kube_pod_labels{k8s_cluster_name=\"$cluster\"},k8s_namespace_name)",
+        "name": "namespace",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(kube_pod_labels{k8s_cluster_name=\"$cluster\"},k8s_namespace_name)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "regexApplyTo": "value",
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "be-product",
+          "value": "be-product"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "bfhy0zihe76rkd"
+        },
+        "definition": "label_values(kube_pod_labels{k8s_cluster_name=\"$cluster\", k8s_namespace_name=\"$namespace\"},label_app_kubernetes_io_name)",
+        "name": "service",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(kube_pod_labels{k8s_cluster_name=\"$cluster\", k8s_namespace_name=\"$namespace\"},label_app_kubernetes_io_name)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "regexApplyTo": "value",
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "bfhy0zihe76rkd"
+        },
+        "definition": "query_result(label_replace(  {    __name__=~\"http_server_request_duration_seconds_count|http_server_duration_milliseconds_count\",    k8s_cluster_name=\"$cluster\",    k8s_namespace_name=\"$namespace\",        service_name=\"$service\"  },  \"http_request_method\", \"$1\",\"http_method\", \"(.+)\" ))",
+        "includeAll": true,
+        "label": "http_method",
+        "multi": true,
+        "name": "http_method",
+        "options": [],
+        "query": {
+          "qryType": 3,
+          "query": "query_result(label_replace(  {    __name__=~\"http_server_request_duration_seconds_count|http_server_duration_milliseconds_count\",    k8s_cluster_name=\"$cluster\",    k8s_namespace_name=\"$namespace\",        service_name=\"$service\"  },  \"http_request_method\", \"$1\",\"http_method\", \"(.+)\" ))",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "/http_request_method=\"(?<text>[^\"]+)/g",
+        "regexApplyTo": "value",
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "bfhy0zihe76rkd"
+        },
+        "definition": "query_result(label_replace(  {    __name__=~\"http_server_request_duration_seconds_count|http_server_duration_milliseconds_count\",    k8s_cluster_name=\"$cluster\",    k8s_namespace_name=\"$namespace\",        service_name=\"$service\"  },  \"http_route\", \"$1\",\"http_target\", \"(.+)\"))",
+        "description": "",
+        "includeAll": true,
+        "label": "http_url",
+        "multi": true,
+        "name": "http_url",
+        "options": [],
+        "query": {
+          "qryType": 3,
+          "query": "query_result(label_replace(  {    __name__=~\"http_server_request_duration_seconds_count|http_server_duration_milliseconds_count\",    k8s_cluster_name=\"$cluster\",    k8s_namespace_name=\"$namespace\",        service_name=\"$service\"  },  \"http_route\", \"$1\",\"http_target\", \"(.+)\"))",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "/http_route=\"(?<text>[^\"]+)/g",
+        "regexApplyTo": "value",
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Service Details > HTTP",
+  "uid": "svc-trace-http",
+  "version": 26,
+  "weekStart": ""
+}

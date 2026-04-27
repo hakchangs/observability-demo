@@ -1,0 +1,236 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div>\n  <h1>Services</h1>\n  <div style=\"display:flex; gap:8px; border-bottom: 1px solid #333;\">\n    <a href=\"/d/svc-overview?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Overview\n    </a>\n    <a href=\"/d/svc-metric?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Metrics\n    </a>\n    <a href=\"/d/svc-log?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:white; text-decoration:none; border-bottom: 1px solid #ff8833;\">\n        Logs\n    </a>                                                                            \n    <a href=\"/d/svc-trace?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Traces\n    </a>\n    <a href=\"/d/svc-trace-http?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        HTTP\n    </a>\n    <a href=\"/d/svc-trace-db?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        DB\n    </a>\n    <a href=\"/d/svc-trace-messaging?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Messaging\n    </a>\n    <a href=\"/d/svc-metric-jvm?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        JVM\n    </a>\n    <a href=\"/d/svc-metric-python?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Python\n    </a>\n    <a href=\"/d/svc-metric-nodejs?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        NodeJS\n    </a>\n  </div>\n</div>",
+        "mode": "html"
+      },
+      "pluginVersion": "12.4.2",
+      "title": "",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "bfi0uf41ezgg0c"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 19,
+        "w": 24,
+        "x": 0,
+        "y": 3
+      },
+      "id": 1,
+      "options": {
+        "dedupStrategy": "none",
+        "enableInfiniteScrolling": true,
+        "enableLogDetails": true,
+        "fontSize": "small",
+        "showControls": true,
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Ascending",
+        "syntaxHighlighting": false,
+        "unwrappedColumns": false,
+        "wrapLogMessage": false
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "bfi0uf41ezgg0c"
+          },
+          "direction": "forward",
+          "editorMode": "code",
+          "expr": "{\n    service_name=\"$service\",\n    k8s_cluster_name=\"$cluster\",\n    k8s_namespace_name=\"$namespace\"\n}\n| logfmt | detected_level =~ \"$level\" | log_type =~ \"$log_type\"\n# | line_format \"[{{.trace_id}}] {{__line__}}\" # log line customizing",
+          "maxLines": 2000,
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "",
+      "transparent": true,
+      "type": "logs"
+    }
+  ],
+  "preload": false,
+  "refresh": "5s",
+  "schemaVersion": 42,
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "dev",
+          "value": "dev"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "bfhy0zihe76rkd"
+        },
+        "definition": "label_values(kube_pod_labels,k8s_cluster_name)",
+        "name": "cluster",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(kube_pod_labels,k8s_cluster_name)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "regexApplyTo": "value",
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "app",
+          "value": "app"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "bfhy0zihe76rkd"
+        },
+        "definition": "label_values(kube_pod_labels{k8s_cluster_name=\"$cluster\"},k8s_namespace_name)",
+        "name": "namespace",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(kube_pod_labels{k8s_cluster_name=\"$cluster\"},k8s_namespace_name)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "regexApplyTo": "value",
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "be-product",
+          "value": "be-product"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "bfhy0zihe76rkd"
+        },
+        "definition": "query_result(sum by (service_name)(  label_replace(    kube_pod_labels {      label_app_kubernetes_io_name!=\"\",      k8s_cluster_name=\"$cluster\",      k8s_namespace_name=\"$namespace\"    },    \"service_name\", \"$1\", \"label_app_kubernetes_io_name\", \"(.+)\"     )))",
+        "label": "service",
+        "name": "service",
+        "options": [],
+        "query": {
+          "qryType": 3,
+          "query": "query_result(sum by (service_name)(  label_replace(    kube_pod_labels {      label_app_kubernetes_io_name!=\"\",      k8s_cluster_name=\"$cluster\",      k8s_namespace_name=\"$namespace\"    },    \"service_name\", \"$1\", \"label_app_kubernetes_io_name\", \"(.+)\"     )))",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "/service_name=\"(?<text>[^\"]+)/g",
+        "regexApplyTo": "value",
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "text": [
+            "info"
+          ],
+          "value": [
+            "info"
+          ]
+        },
+        "includeAll": true,
+        "multi": true,
+        "name": "level",
+        "options": [],
+        "query": "trace,debug,info,warn,error",
+        "type": "custom",
+        "valuesFormat": "csv"
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "text": [
+            "$__all"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "includeAll": true,
+        "label": "log_type",
+        "multi": true,
+        "name": "log_type",
+        "options": [],
+        "query": "http",
+        "type": "custom",
+        "valuesFormat": "csv"
+      },
+      {
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "name": "search",
+        "options": [
+          {
+            "selected": true,
+            "text": "",
+            "value": ""
+          }
+        ],
+        "query": "",
+        "type": "textbox"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Service Details > Logs",
+  "uid": "svc-log",
+  "version": 19,
+  "weekStart": ""
+}
