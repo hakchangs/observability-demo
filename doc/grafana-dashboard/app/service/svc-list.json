@@ -1,4 +1,41 @@
 {
+  "__inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "Prometheus",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "12.4.2"
+    },
+    {
+      "type": "datasource",
+      "id": "prometheus",
+      "name": "Prometheus",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "text",
+      "name": "Text",
+      "version": ""
+    }
+  ],
   "annotations": {
     "list": [
       {
@@ -21,10 +58,6 @@
   "links": [],
   "panels": [
     {
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
       "gridPos": {
         "h": 3,
         "w": 24,
@@ -42,14 +75,13 @@
         "mode": "html"
       },
       "pluginVersion": "12.4.2",
-      "title": "",
       "transparent": true,
       "type": "text"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "bfhy0zihe76rkd"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -161,7 +193,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "bfhy0zihe76rkd"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -175,7 +207,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "bfhy0zihe76rkd"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -189,7 +221,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "bfhy0zihe76rkd"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -203,7 +235,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "bfhy0zihe76rkd"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -215,7 +247,6 @@
           "refId": "C"
         }
       ],
-      "title": "",
       "transformations": [
         {
           "id": "merge",
@@ -279,17 +310,10 @@
     "list": [
       {
         "allValue": ".*",
-        "current": {
-          "text": [
-            "dev"
-          ],
-          "value": [
-            "dev"
-          ]
-        },
+        "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "bfhy0zihe76rkd"
+          "uid": "${DS_PROMETHEUS}"
         },
         "definition": "label_values(kube_pod_labels,k8s_cluster_name)",
         "includeAll": true,
@@ -308,17 +332,10 @@
       },
       {
         "allValue": ".*",
-        "current": {
-          "text": [
-            "app"
-          ],
-          "value": [
-            "app"
-          ]
-        },
+        "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "bfhy0zihe76rkd"
+          "uid": "${DS_PROMETHEUS}"
         },
         "definition": "label_values(kube_pod_labels{k8s_cluster_name=~\"$cluster\"},k8s_namespace_name)",
         "includeAll": true,
@@ -345,6 +362,6 @@
   "timezone": "browser",
   "title": "Service List",
   "uid": "svc-list",
-  "version": 2,
+  "version": 31,
   "weekStart": ""
 }

@@ -1,4 +1,55 @@
 {
+  "__inputs": [
+    {
+      "name": "DS_TEMPO",
+      "label": "Tempo",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "tempo",
+      "pluginName": "Tempo"
+    },
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "Prometheus",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "12.4.2"
+    },
+    {
+      "type": "datasource",
+      "id": "prometheus",
+      "name": "Prometheus",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": ""
+    },
+    {
+      "type": "datasource",
+      "id": "tempo",
+      "name": "Tempo",
+      "version": "12.4.2"
+    },
+    {
+      "type": "panel",
+      "id": "text",
+      "name": "Text",
+      "version": ""
+    }
+  ],
   "annotations": {
     "list": [
       {
@@ -21,10 +72,6 @@
   "links": [],
   "panels": [
     {
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
       "gridPos": {
         "h": 3,
         "w": 24,
@@ -42,14 +89,13 @@
         "mode": "html"
       },
       "pluginVersion": "12.4.2",
-      "title": "",
       "transparent": true,
       "type": "text"
     },
     {
       "datasource": {
         "type": "tempo",
-        "uid": "cfi0zwvte1x4wa"
+        "uid": "${DS_TEMPO}"
       },
       "description": "HTTP 수신기반 추적\n- Duration 임계치: 1500ms",
       "fieldConfig": {
@@ -243,7 +289,7 @@
         {
           "datasource": {
             "type": "tempo",
-            "uid": "cfi0zwvte1x4wa"
+            "uid": "${DS_TEMPO}"
           },
           "filters": [
             {
@@ -346,7 +392,7 @@
     {
       "datasource": {
         "type": "tempo",
-        "uid": "cfi0zwvte1x4wa"
+        "uid": "${DS_TEMPO}"
       },
       "description": "DB 쿼리 추적",
       "fieldConfig": {
@@ -555,7 +601,7 @@
         {
           "datasource": {
             "type": "tempo",
-            "uid": "cfi0zwvte1x4wa"
+            "uid": "${DS_TEMPO}"
           },
           "filters": [
             {
@@ -651,13 +697,10 @@
   "templating": {
     "list": [
       {
-        "current": {
-          "text": "dev",
-          "value": "dev"
-        },
+        "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "bfhy0zihe76rkd"
+          "uid": "${DS_PROMETHEUS}"
         },
         "definition": "label_values(kube_pod_labels,k8s_cluster_name)",
         "name": "cluster",
@@ -673,13 +716,10 @@
         "type": "query"
       },
       {
-        "current": {
-          "text": "app",
-          "value": "app"
-        },
+        "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "bfhy0zihe76rkd"
+          "uid": "${DS_PROMETHEUS}"
         },
         "definition": "label_values(kube_pod_labels{k8s_cluster_name=\"$cluster\"},k8s_namespace_name)",
         "name": "namespace",
@@ -695,13 +735,10 @@
         "type": "query"
       },
       {
-        "current": {
-          "text": "be-auth",
-          "value": "be-auth"
-        },
+        "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "bfhy0zihe76rkd"
+          "uid": "${DS_PROMETHEUS}"
         },
         "definition": "query_result(sum by (service_name)(  label_replace(    kube_pod_labels {      label_app_kubernetes_io_name!=\"\",      k8s_cluster_name=\"$cluster\",      k8s_namespace_name=\"$namespace\"    },    \"service_name\", \"$1\", \"label_app_kubernetes_io_name\", \"(.+)\"     )))",
         "description": "",
@@ -720,17 +757,10 @@
       },
       {
         "allValue": ".*",
-        "current": {
-          "text": [
-            "GET"
-          ],
-          "value": [
-            "GET"
-          ]
-        },
+        "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "bfhy0zihe76rkd"
+          "uid": "${DS_PROMETHEUS}"
         },
         "definition": "label_values(http_server_request_duration_seconds_count{service_name=\"$service\"},http_request_method)",
         "description": "",
@@ -751,17 +781,10 @@
       },
       {
         "allValue": ".*",
-        "current": {
-          "text": [
-            "/actuator/health"
-          ],
-          "value": [
-            "/actuator/health"
-          ]
-        },
+        "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "bfhy0zihe76rkd"
+          "uid": "${DS_PROMETHEUS}"
         },
         "definition": "label_values(http_server_request_duration_seconds_count{service_name=\"$service\"},http_route)",
         "description": "",

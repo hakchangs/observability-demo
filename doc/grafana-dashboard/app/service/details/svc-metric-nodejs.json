@@ -1,4 +1,47 @@
 {
+  "__inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "Prometheus",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "panel",
+      "id": "gauge",
+      "name": "Gauge",
+      "version": ""
+    },
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "12.4.2"
+    },
+    {
+      "type": "datasource",
+      "id": "prometheus",
+      "name": "Prometheus",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "text",
+      "name": "Text",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "Time series",
+      "version": ""
+    }
+  ],
   "annotations": {
     "list": [
       {
@@ -21,10 +64,6 @@
   "links": [],
   "panels": [
     {
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
       "gridPos": {
         "h": 3,
         "w": 24,
@@ -42,14 +81,13 @@
         "mode": "html"
       },
       "pluginVersion": "12.4.2",
-      "title": "",
       "transparent": true,
       "type": "text"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "bfhy0zihe76rkd"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -107,7 +145,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "bfhy0zihe76rkd"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "(\n    sum({\n        __name__=\"v8js_memory_heap_used_bytes\",\n        service_name=\"$service\"\n    })\n    /\n    sum({\n        __name__=\"v8js_memory_heap_limit_bytes\",\n        service_name=\"$service\"\n    })\n) * 100",
@@ -121,7 +159,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "bfhy0zihe76rkd"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -206,7 +244,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "bfhy0zihe76rkd"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum({\n    __name__=\"v8js_memory_heap_used_bytes\",\n    service_name=\"$service\"\n})",
@@ -217,7 +255,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "bfhy0zihe76rkd"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum({\n    __name__=\"v8js_memory_heap_limit_bytes\",\n    service_name=\"$service\"\n})",
@@ -228,7 +266,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "bfhy0zihe76rkd"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum({\n    __name__=\"v8js_memory_heap_space_physical_size_bytes\",\n    service_name=\"$service\"\n})",
@@ -243,7 +281,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "bfhy0zihe76rkd"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -327,7 +365,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "bfhy0zihe76rkd"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "rate({\n    __name__=\"v8js_gc_duration_seconds_sum\",\n    service_name=\"$service\"\n}[5m])\n/\nrate({\n    __name__=\"v8js_gc_duration_seconds_count\",\n    service_name=\"$service\"\n}[5m])",
@@ -338,7 +376,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "bfhy0zihe76rkd"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "rate({\n    __name__=\"v8js_gc_duration_seconds_count\",\n    service_name=\"$service\"\n}[5m])",
@@ -353,7 +391,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "bfhy0zihe76rkd"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -411,7 +449,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "bfhy0zihe76rkd"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "{\n    __name__=\"nodejs_eventloop_utilization_ratio\",\n    service_name=\"$service\"\n}",
@@ -425,7 +463,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "bfhy0zihe76rkd"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -517,7 +555,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "bfhy0zihe76rkd"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "{\n    __name__=\"nodejs_eventloop_delay_p50_seconds\",\n    service_name=\"$service\"\n}",
@@ -528,7 +566,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "bfhy0zihe76rkd"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "{\n    __name__=\"nodejs_eventloop_delay_p90_seconds\",\n    service_name=\"$service\"\n}",
@@ -539,7 +577,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "bfhy0zihe76rkd"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "{\n    __name__=\"nodejs_eventloop_delay_p99_seconds\",\n    service_name=\"$service\"\n}",
@@ -550,7 +588,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "bfhy0zihe76rkd"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "{\n    __name__=\"nodejs_eventloop_delay_max_seconds\",\n    service_name=\"$service\"\n}",
@@ -570,13 +608,10 @@
   "templating": {
     "list": [
       {
-        "current": {
-          "text": "dev",
-          "value": "dev"
-        },
+        "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "bfhy0zihe76rkd"
+          "uid": "${DS_PROMETHEUS}"
         },
         "definition": "label_values(kube_pod_labels,k8s_cluster_name)",
         "name": "cluster",
@@ -592,13 +627,10 @@
         "type": "query"
       },
       {
-        "current": {
-          "text": "app",
-          "value": "app"
-        },
+        "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "bfhy0zihe76rkd"
+          "uid": "${DS_PROMETHEUS}"
         },
         "definition": "label_values(kube_pod_labels{k8s_cluster_name=\"$cluster\"},k8s_namespace_name)",
         "name": "namespace",
@@ -614,13 +646,10 @@
         "type": "query"
       },
       {
-        "current": {
-          "text": "be-product",
-          "value": "be-product"
-        },
+        "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "bfhy0zihe76rkd"
+          "uid": "${DS_PROMETHEUS}"
         },
         "definition": "query_result(sum by (service_name)(  label_replace(    kube_pod_labels {      label_app_kubernetes_io_name!=\"\",      k8s_cluster_name=\"$cluster\",      k8s_namespace_name=\"$namespace\"    },    \"service_name\", \"$1\", \"label_app_kubernetes_io_name\", \"(.+)\"     )))",
         "label": "service",
@@ -638,15 +667,10 @@
       },
       {
         "allValue": ".*",
-        "current": {
-          "text": "All",
-          "value": [
-            "$__all"
-          ]
-        },
+        "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "bfhy0zihe76rkd"
+          "uid": "${DS_PROMETHEUS}"
         },
         "definition": "query_result(sum by (k8s_pod_name, k8s_namespace_name, k8s_cluster_uid)(  kube_pod_info {    k8s_pod_name!=\"\",    k8s_namespace_name=\"$namespace\",    k8s_cluster_name=\"$cluster\"  })* on(k8s_pod_name) group_left(pod) kube_pod_labels {  label_app_kubernetes_io_name=\"$service\"})",
         "includeAll": true,

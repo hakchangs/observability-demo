@@ -1,4 +1,55 @@
 {
+  "__inputs": [
+    {
+      "name": "DS_LOKI",
+      "label": "Loki",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "loki",
+      "pluginName": "Loki"
+    },
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "Prometheus",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "12.4.2"
+    },
+    {
+      "type": "panel",
+      "id": "logs",
+      "name": "Logs",
+      "version": ""
+    },
+    {
+      "type": "datasource",
+      "id": "loki",
+      "name": "Loki",
+      "version": "12.4.2"
+    },
+    {
+      "type": "datasource",
+      "id": "prometheus",
+      "name": "Prometheus",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "text",
+      "name": "Text",
+      "version": ""
+    }
+  ],
   "annotations": {
     "list": [
       {
@@ -21,10 +72,6 @@
   "links": [],
   "panels": [
     {
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
       "gridPos": {
         "h": 3,
         "w": 24,
@@ -42,18 +89,13 @@
         "mode": "html"
       },
       "pluginVersion": "12.4.2",
-      "title": "",
       "transparent": true,
       "type": "text"
     },
     {
       "datasource": {
         "type": "loki",
-        "uid": "bfi0uf41ezgg0c"
-      },
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
+        "uid": "${DS_LOKI}"
       },
       "gridPos": {
         "h": 19,
@@ -80,7 +122,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "bfi0uf41ezgg0c"
+            "uid": "${DS_LOKI}"
           },
           "direction": "forward",
           "editorMode": "code",
@@ -90,7 +132,6 @@
           "refId": "A"
         }
       ],
-      "title": "",
       "transparent": true,
       "type": "logs"
     }
@@ -102,13 +143,10 @@
   "templating": {
     "list": [
       {
-        "current": {
-          "text": "dev",
-          "value": "dev"
-        },
+        "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "bfhy0zihe76rkd"
+          "uid": "${DS_PROMETHEUS}"
         },
         "definition": "label_values(kube_pod_labels,k8s_cluster_name)",
         "name": "cluster",
@@ -124,13 +162,10 @@
         "type": "query"
       },
       {
-        "current": {
-          "text": "app",
-          "value": "app"
-        },
+        "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "bfhy0zihe76rkd"
+          "uid": "${DS_PROMETHEUS}"
         },
         "definition": "label_values(kube_pod_labels{k8s_cluster_name=\"$cluster\"},k8s_namespace_name)",
         "name": "namespace",
@@ -146,13 +181,10 @@
         "type": "query"
       },
       {
-        "current": {
-          "text": "be-product",
-          "value": "be-product"
-        },
+        "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "bfhy0zihe76rkd"
+          "uid": "${DS_PROMETHEUS}"
         },
         "definition": "query_result(sum by (service_name)(  label_replace(    kube_pod_labels {      label_app_kubernetes_io_name!=\"\",      k8s_cluster_name=\"$cluster\",      k8s_namespace_name=\"$namespace\"    },    \"service_name\", \"$1\", \"label_app_kubernetes_io_name\", \"(.+)\"     )))",
         "label": "service",
@@ -181,7 +213,33 @@
         "includeAll": true,
         "multi": true,
         "name": "level",
-        "options": [],
+        "options": [
+          {
+            "selected": false,
+            "text": "trace",
+            "value": "trace"
+          },
+          {
+            "selected": false,
+            "text": "debug",
+            "value": "debug"
+          },
+          {
+            "selected": true,
+            "text": "info",
+            "value": "info"
+          },
+          {
+            "selected": false,
+            "text": "warn",
+            "value": "warn"
+          },
+          {
+            "selected": false,
+            "text": "error",
+            "value": "error"
+          }
+        ],
         "query": "trace,debug,info,warn,error",
         "type": "custom",
         "valuesFormat": "csv"
@@ -200,7 +258,13 @@
         "label": "log_type",
         "multi": true,
         "name": "log_type",
-        "options": [],
+        "options": [
+          {
+            "selected": false,
+            "text": "http",
+            "value": "http"
+          }
+        ],
         "query": "http",
         "type": "custom",
         "valuesFormat": "csv"
