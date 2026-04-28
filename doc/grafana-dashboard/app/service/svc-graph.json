@@ -1,5 +1,22 @@
 {
-  "__inputs": [],
+  "__inputs": [
+    {
+      "name": "DS_TEMPO",
+      "label": "Tempo",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "tempo",
+      "pluginName": "Tempo"
+    },
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "Prometheus",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    }
+  ],
   "__elements": {},
   "__requires": [
     {
@@ -10,14 +27,26 @@
     },
     {
       "type": "panel",
-      "id": "text",
-      "name": "Text",
+      "id": "nodeGraph",
+      "name": "Node Graph",
       "version": ""
     },
     {
+      "type": "datasource",
+      "id": "prometheus",
+      "name": "Prometheus",
+      "version": "1.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "tempo",
+      "name": "Tempo",
+      "version": "12.4.2"
+    },
+    {
       "type": "panel",
-      "id": "timeseries",
-      "name": "Time series",
+      "id": "text",
+      "name": "Text",
       "version": ""
     }
   ],
@@ -56,7 +85,7 @@
           "showLineNumbers": false,
           "showMiniMap": false
         },
-        "content": "<div>\n  <h1>Services</h1>\n  <div style=\"display:flex; gap:8px; border-bottom: 1px solid #333;\">\n    <a href=\"/d/svc-list\"\n       style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n      Service List                                                                    \n    </a>                                                                              \n    <a href=\"/d/svc-graph\"                                \n       style=\"padding:6px 16px; color:white; text-decoration:none; border-bottom: 1px solid #ff8833;\">\n      Service Graph                                                                   \n    </a>           \n  </div>\n</div>",
+        "content": "<div>\n  <h1>Services</h1>\n  <div style=\"display:flex; gap:8px; border-bottom: 1px solid #333;\">\n    <a href=\"/d/svc-list\"\n       style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n      Service List\n    </a>\n    <a href=\"/d/svc-graph\"\n       style=\"padding:6px 16px; color:white; text-decoration:none; border-bottom: 1px solid #ff8833;\">\n      Service Graph\n    </a>\n    <a href=\"/d/svc-trace\"\n       style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n      Service Traces\n    </a>\n  </div>\n</div>",
         "mode": "html"
       },
       "pluginVersion": "12.4.2",
@@ -65,105 +94,91 @@
     },
     {
       "datasource": {
-        "type": "datasource",
-        "uid": "grafana"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
+        "type": "tempo",
+        "uid": "${DS_TEMPO}"
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
+        "h": 16,
+        "w": 24,
         "x": 0,
         "y": 3
       },
-      "id": 1,
+      "id": 3,
       "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
+        "edges": {},
+        "layoutAlgorithm": "layered",
+        "nodes": {},
+        "zoomMode": "cooperative"
       },
       "pluginVersion": "12.4.2",
       "targets": [
         {
           "datasource": {
-            "type": "datasource",
-            "uid": "grafana"
+            "type": "tempo",
+            "uid": "${DS_TEMPO}"
           },
-          "queryType": "randomWalk",
-          "refId": "A"
+          "limit": 20,
+          "metricsQueryType": "range",
+          "queryType": "serviceMap",
+          "refId": "A",
+          "serviceMapUseNativeHistograms": false,
+          "tableType": "traces"
         }
       ],
-      "title": "New panel",
-      "type": "timeseries"
+      "transparent": true,
+      "type": "nodeGraph"
     }
   ],
   "preload": false,
   "schemaVersion": 42,
   "tags": [],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "allValue": ".*",
+        "current": {},
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(kube_pod_labels,k8s_cluster_name)",
+        "includeAll": true,
+        "multi": true,
+        "name": "cluster",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(kube_pod_labels,k8s_cluster_name)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "regexApplyTo": "value",
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {},
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(kube_pod_labels{k8s_cluster_name=~\"$cluster\"},k8s_namespace_name)",
+        "includeAll": true,
+        "multi": true,
+        "name": "namespace",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(kube_pod_labels{k8s_cluster_name=~\"$cluster\"},k8s_namespace_name)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "regexApplyTo": "value",
+        "type": "query"
+      }
+    ]
   },
   "time": {
     "from": "now-6h",
@@ -173,6 +188,6 @@
   "timezone": "browser",
   "title": "Service Graph",
   "uid": "svc-graph",
-  "version": 5,
+  "version": 9,
   "weekStart": ""
 }

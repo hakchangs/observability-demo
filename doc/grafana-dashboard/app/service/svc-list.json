@@ -71,7 +71,7 @@
           "showLineNumbers": false,
           "showMiniMap": false
         },
-        "content": "<div>\n  <h1>Services</h1>\n  <div style=\"display:flex; gap:8px; border-bottom: 1px solid #333;\">\n    <a href=\"/d/svc-list\"\n       style=\"padding:6px 16px; color:white; text-decoration:none; border-bottom: 1px solid #ff8833;\"\n       >\n      Service List                                                                    \n    </a>                                                                              \n    <a href=\"/d/svc-graph\"\n       style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n      Service Graph                                                                   \n    </a>           \n  </div>\n</div>\n<div>",
+        "content": "<div>\n  <h1>Services</h1>\n  <div style=\"display:flex; gap:8px; border-bottom: 1px solid #333;\">\n    <a href=\"/d/svc-list\"\n       style=\"padding:6px 16px; color:white; text-decoration:none; border-bottom: 1px solid #ff8833;\"\n       >\n      Service List\n    </a>\n    <a href=\"/d/svc-graph\"\n       style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n      Service Graph\n    </a>\n    <a href=\"/d/svc-trace\"\n       style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n      Service Traces\n    </a>\n  </div>\n</div>\n<div>",
         "mode": "html"
       },
       "pluginVersion": "12.4.2",
@@ -362,6 +362,6 @@
   "timezone": "browser",
   "title": "Service List",
   "uid": "svc-list",
-  "version": 31,
+  "version": 2,
   "weekStart": ""
 }

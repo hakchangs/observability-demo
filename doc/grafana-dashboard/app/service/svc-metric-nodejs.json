@@ -77,7 +77,7 @@
           "showLineNumbers": false,
           "showMiniMap": false
         },
-        "content": "<div>\n  <h1>Services</h1>\n  <div style=\"display:flex; gap:8px; border-bottom: 1px solid #333;\">\n    <a href=\"/d/svc-overview?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Overview\n    </a>\n    <a href=\"/d/svc-metric?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Metrics\n    </a>\n    <a href=\"/d/svc-log?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Logs\n    </a>                                                                            \n    <a href=\"/d/svc-trace?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Traces\n    </a>\n    <a href=\"/d/svc-trace-http?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        HTTP\n    </a>\n    <a href=\"/d/svc-trace-db?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        DB\n    </a>\n    <a href=\"/d/svc-trace-messaging?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Messaging\n    </a>\n    <a href=\"/d/svc-metric-jvm?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        JVM\n    </a>\n    <a href=\"/d/svc-metric-python?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Python\n    </a>\n    <a href=\"/d/svc-metric-nodejs?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:white; text-decoration:none; border-bottom: 1px solid #ff8833;\">\n        NodeJS\n    </a>\n  </div>\n</div>",
+        "content": "<div>\n  <h1>Services</h1>\n  <div style=\"display:flex; gap:8px; border-bottom: 1px solid #333;\">\n    <a href=\"/d/svc-overview?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Overview\n    </a>\n    <a href=\"/d/svc-metric?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Metrics\n    </a>\n    <a href=\"/d/svc-log?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Logs\n    </a>                                                                            \n        <a href=\"/d/svc-trace-http?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        HTTP\n    </a>\n    <a href=\"/d/svc-trace-db?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        DB\n    </a>\n    <a href=\"/d/svc-trace-messaging?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Messaging\n    </a>\n    <a href=\"/d/svc-metric-jvm?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none; display: ${display_jvm};\">\n        JVM\n    </a>\n    <a href=\"/d/svc-metric-python?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none; display: ${display_python};\">\n        Python\n    </a>\n    <a href=\"/d/svc-metric-nodejs?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:white; text-decoration:none; border-bottom: 1px solid #ff8833; display: ${display_nodejs};\">\n        NodeJS\n    </a>\n  </div>\n</div>",
         "mode": "html"
       },
       "pluginVersion": "12.4.2",
@@ -684,6 +684,66 @@
         },
         "refresh": 1,
         "regex": "/k8s_pod_name=\"(?<text>[^\"]+)/g",
+        "regexApplyTo": "value",
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "query_result(label_replace(  sum({    __name__=\"jvm_class_count\",    k8s_cluster_name=\"$cluster\",    k8s_namespace_name=\"$namespace\",    service_name=\"$service\"  }),  \"display_jvm\", \"block\", \"\", \"\") or label_replace(  absent({    __name__=\"jvm_class_count\",    k8s_cluster_name=\"$cluster\",    k8s_namespace_name=\"$namespace\",    service_name=\"$service\"  }),  \"display_jvm\", \"none\", \"\", \"\"))",
+        "hide": 2,
+        "name": "display_jvm",
+        "options": [],
+        "query": {
+          "qryType": 3,
+          "query": "query_result(label_replace(  sum({    __name__=\"jvm_class_count\",    k8s_cluster_name=\"$cluster\",    k8s_namespace_name=\"$namespace\",    service_name=\"$service\"  }),  \"display_jvm\", \"block\", \"\", \"\") or label_replace(  absent({    __name__=\"jvm_class_count\",    k8s_cluster_name=\"$cluster\",    k8s_namespace_name=\"$namespace\",    service_name=\"$service\"  }),  \"display_jvm\", \"none\", \"\", \"\"))",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "/display_jvm=\"(?<text>[^\"]+)/g",
+        "regexApplyTo": "value",
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "query_result(label_replace(  sum({    __name__=\"cpython_gc_collections_total\",    k8s_cluster_name=\"$cluster\",    k8s_namespace_name=\"$namespace\",    service_name=\"$service\"  }),  \"display_python\", \"block\", \"\", \"\") or label_replace(  absent({    __name__=\"cpython_gc_collections_total\",    k8s_cluster_name=\"$cluster\",    k8s_namespace_name=\"$namespace\",    service_name=\"$service\"  }),  \"display_python\", \"none\", \"\", \"\"))",
+        "hide": 2,
+        "name": "display_python",
+        "options": [],
+        "query": {
+          "qryType": 3,
+          "query": "query_result(label_replace(  sum({    __name__=\"cpython_gc_collections_total\",    k8s_cluster_name=\"$cluster\",    k8s_namespace_name=\"$namespace\",    service_name=\"$service\"  }),  \"display_python\", \"block\", \"\", \"\") or label_replace(  absent({    __name__=\"cpython_gc_collections_total\",    k8s_cluster_name=\"$cluster\",    k8s_namespace_name=\"$namespace\",    service_name=\"$service\"  }),  \"display_python\", \"none\", \"\", \"\"))",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "/display_python=\"(?<text>[^\"]+)/g",
+        "regexApplyTo": "value",
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "query_result(label_replace(  sum({    __name__=\"nodejs_eventloop_utilization_ratio\",    k8s_cluster_name=\"$cluster\",    k8s_namespace_name=\"$namespace\",    service_name=\"$service\"  }),  \"display_nodejs\", \"block\", \"\", \"\") or label_replace(  absent({    __name__=\"nodejs_eventloop_utilization_ratio\",    k8s_cluster_name=\"$cluster\",    k8s_namespace_name=\"$namespace\",    service_name=\"$service\"  }),  \"display_nodejs\", \"none\", \"\", \"\"))",
+        "hide": 2,
+        "name": "display_nodejs",
+        "options": [],
+        "query": {
+          "qryType": 3,
+          "query": "query_result(label_replace(  sum({    __name__=\"nodejs_eventloop_utilization_ratio\",    k8s_cluster_name=\"$cluster\",    k8s_namespace_name=\"$namespace\",    service_name=\"$service\"  }),  \"display_nodejs\", \"block\", \"\", \"\") or label_replace(  absent({    __name__=\"nodejs_eventloop_utilization_ratio\",    k8s_cluster_name=\"$cluster\",    k8s_namespace_name=\"$namespace\",    service_name=\"$service\"  }),  \"display_nodejs\", \"none\", \"\", \"\"))",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "/display_nodejs=\"(?<text>[^\"]+)/g",
         "regexApplyTo": "value",
         "type": "query"
       }
