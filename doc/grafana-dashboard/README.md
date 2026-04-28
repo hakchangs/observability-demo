@@ -1,4 +1,5 @@
 ##### 일괄 Import
 ```bash
-./auto.py .
+# service account 로 token 발급받아 API 호출 설정
+./import-dashboard.py .
 ```
