@@ -10,8 +10,12 @@ GRAFANA_URL = "http://grafana.platform.local"
 GRAFANA_TOKEN = "glsa_vXMAVgOwxgA9rKks0FOGq3lYbSk5frmi_eebb66da"
 HEADERS = {"Authorization": f"Bearer {GRAFANA_TOKEN}", "Content-Type": "application/json"}
 
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 session = requests.Session()
 session.headers.update(HEADERS)
+session.verify = False
 
 @lru_cache(maxsize=None)
 def resolve_ds_uid(name: str) -> str:
