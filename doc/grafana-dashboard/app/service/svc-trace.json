@@ -314,12 +314,14 @@
   "templating": {
     "list": [
       {
+        "allValue": ".*",
         "current": {},
         "datasource": {
           "type": "prometheus",
           "uid": "${DS_PROMETHEUS}"
         },
         "definition": "label_values(kube_pod_labels,k8s_cluster_name)",
+        "includeAll": false,
         "name": "cluster",
         "options": [],
         "query": {
@@ -333,21 +335,24 @@
         "type": "query"
       },
       {
+        "allValue": "",
         "current": {},
         "datasource": {
           "type": "prometheus",
           "uid": "${DS_PROMETHEUS}"
         },
-        "definition": "label_values(kube_pod_labels{k8s_cluster_name=\"$cluster\"},k8s_namespace_name)",
+        "definition": "query_result(sum by (k8s_namespace_name) ({  __name__=~\"jvm_class_count|cpython_gc_collections_total|nodejs_eventloop_utilization_ratio\",  k8s_cluster_name=\"$cluster\",  k8s_namespace_name!=\"\"})* on (k8s_namespace_name) sum by (k8s_namespace_name) ({  __name__=\"kube_pod_labels\",  k8s_cluster_name=\"$cluster\",  k8s_namespace_name!=\"\"}))",
+        "includeAll": true,
+        "multi": true,
         "name": "namespace",
         "options": [],
         "query": {
-          "qryType": 1,
-          "query": "label_values(kube_pod_labels{k8s_cluster_name=\"$cluster\"},k8s_namespace_name)",
+          "qryType": 3,
+          "query": "query_result(sum by (k8s_namespace_name) ({  __name__=~\"jvm_class_count|cpython_gc_collections_total|nodejs_eventloop_utilization_ratio\",  k8s_cluster_name=\"$cluster\",  k8s_namespace_name!=\"\"})* on (k8s_namespace_name) sum by (k8s_namespace_name) ({  __name__=\"kube_pod_labels\",  k8s_cluster_name=\"$cluster\",  k8s_namespace_name!=\"\"}))",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
-        "regex": "",
+        "regex": "/k8s_namespace_name=\"(?<text>[^\"]+)/g",
         "regexApplyTo": "value",
         "type": "query"
       },
