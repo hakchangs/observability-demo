@@ -155,7 +155,7 @@
           },
           "limit": 2000,
           "metricsQueryType": "range",
-          "query": "{\n  resource.service.name=\"$service\"\n  && span.http.route!~\"/actuator/health|/api/health|/api/otlp/v1/traces|/api/otlp/v1/logs\"\n}",
+          "query": "{\n  resource.k8s.cluster.name=\"$cluster\"\n  && resource.k8s.namespace.name=\"$namespace\"\n  && resource.service.name=\"$service\"\n  && span.http.route!~\"/actuator/health|/api/health|/api/otlp/v1/traces|/api/otlp/v1/logs\"\n}",
           "queryType": "traceql",
           "refId": "A",
           "serviceMapUseNativeHistograms": false,
@@ -335,7 +335,6 @@
         "type": "query"
       },
       {
-        "allValue": "",
         "current": {},
         "datasource": {
           "type": "prometheus",
@@ -387,6 +386,6 @@
   "timezone": "browser",
   "title": "Service Traces",
   "uid": "svc-trace",
-  "version": 19,
+  "version": 22,
   "weekStart": ""
 }
