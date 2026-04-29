@@ -105,9 +105,13 @@
       },
       "id": 3,
       "options": {
-        "edges": {},
+        "edges": {
+          "mainStatUnit": ""
+        },
         "layoutAlgorithm": "layered",
-        "nodes": {},
+        "nodes": {
+          "arcs": []
+        },
         "zoomMode": "cooperative"
       },
       "pluginVersion": "12.4.2",
@@ -121,6 +125,7 @@
           "metricsQueryType": "range",
           "queryType": "serviceMap",
           "refId": "A",
+          "serviceMapQuery": "{k8s_cluster_name=\"$cluster\"}",
           "serviceMapUseNativeHistograms": false,
           "tableType": "traces"
         }
@@ -156,7 +161,6 @@
         "type": "query"
       },
       {
-        "allValue": "",
         "current": {},
         "datasource": {
           "type": "prometheus",
@@ -180,13 +184,13 @@
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "Service Graph",
   "uid": "svc-graph",
-  "version": 9,
+  "version": 13,
   "weekStart": ""
 }
