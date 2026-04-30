@@ -932,16 +932,16 @@
           "type": "prometheus",
           "uid": "${DS_PROMETHEUS}"
         },
-        "definition": "label_values(kube_pod_labels{k8s_cluster_name=\"$cluster\"},k8s_namespace_name)",
+        "definition": "query_result(sum by (k8s_namespace_name) ({  __name__=~\"jvm_class_count|cpython_gc_collections_total|nodejs_eventloop_utilization_ratio\",  k8s_cluster_name=\"$cluster\",  k8s_namespace_name!=\"\"})* on (k8s_namespace_name) sum by (k8s_namespace_name) ({  __name__=\"kube_pod_labels\",  k8s_cluster_name=\"$cluster\",  k8s_namespace_name!=\"\"}))",
         "name": "namespace",
         "options": [],
         "query": {
-          "qryType": 1,
-          "query": "label_values(kube_pod_labels{k8s_cluster_name=\"$cluster\"},k8s_namespace_name)",
+          "qryType": 3,
+          "query": "query_result(sum by (k8s_namespace_name) ({  __name__=~\"jvm_class_count|cpython_gc_collections_total|nodejs_eventloop_utilization_ratio\",  k8s_cluster_name=\"$cluster\",  k8s_namespace_name!=\"\"})* on (k8s_namespace_name) sum by (k8s_namespace_name) ({  __name__=\"kube_pod_labels\",  k8s_cluster_name=\"$cluster\",  k8s_namespace_name!=\"\"}))",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
-        "regex": "",
+        "regex": "/k8s_namespace_name=\"(?<text>[^\"]+)/g",
         "regexApplyTo": "value",
         "type": "query"
       },
@@ -951,16 +951,17 @@
           "type": "prometheus",
           "uid": "${DS_PROMETHEUS}"
         },
-        "definition": "label_values(kube_pod_labels{k8s_cluster_name=\"$cluster\", k8s_namespace_name=\"$namespace\"},label_app_kubernetes_io_name)",
+        "definition": "query_result(sum by (k8s_cluster_name, k8s_namespace_name, service_name) ({  __name__=~\"jvm_class_count|cpython_gc_collections_total|nodejs_eventloop_utilization_ratio\",  k8s_cluster_name=\"$cluster\",  k8s_namespace_name=~\"$namespace\"}) * on (k8s_cluster_name, k8s_namespace_name, service_name) sum by (service_name, k8s_cluster_name, k8s_namespace_name) (  label_replace(      kube_pod_labels {        label_app_kubernetes_io_name!=\"\",        k8s_cluster_name=~\"$cluster\",        k8s_namespace_name=~\"$namespace\"      },      \"service_name\", \"$1\", \"label_app_kubernetes_io_name\", \"(.+)\"  )))",
+        "label": "service",
         "name": "service",
         "options": [],
         "query": {
-          "qryType": 1,
-          "query": "label_values(kube_pod_labels{k8s_cluster_name=\"$cluster\", k8s_namespace_name=\"$namespace\"},label_app_kubernetes_io_name)",
+          "qryType": 3,
+          "query": "query_result(sum by (k8s_cluster_name, k8s_namespace_name, service_name) ({  __name__=~\"jvm_class_count|cpython_gc_collections_total|nodejs_eventloop_utilization_ratio\",  k8s_cluster_name=\"$cluster\",  k8s_namespace_name=~\"$namespace\"}) * on (k8s_cluster_name, k8s_namespace_name, service_name) sum by (service_name, k8s_cluster_name, k8s_namespace_name) (  label_replace(      kube_pod_labels {        label_app_kubernetes_io_name!=\"\",        k8s_cluster_name=~\"$cluster\",        k8s_namespace_name=~\"$namespace\"      },      \"service_name\", \"$1\", \"label_app_kubernetes_io_name\", \"(.+)\"  )))",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
-        "regex": "",
+        "regex": "/service_name=\"(?<text>[^\"]+)/g",
         "regexApplyTo": "value",
         "type": "query"
       },
