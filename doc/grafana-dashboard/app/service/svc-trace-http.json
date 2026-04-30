@@ -91,7 +91,7 @@
           "showLineNumbers": false,
           "showMiniMap": false
         },
-        "content": "<div>\n  <h1>Services: ${service}</h1>\n  <div style=\"display:flex; gap:8px; border-bottom: 1px solid #333;\">\n    <a href=\"/d/svc-overview?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Overview\n    </a>\n    <a href=\"/d/svc-metric?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Metrics\n    </a>\n    <a href=\"/d/svc-log?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Logs\n    </a>                                                                            \n        <a href=\"/d/svc-trace-http?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:white; text-decoration:none; border-bottom: 1px solid #ff8833;\">\n        HTTP\n    </a>\n    <a href=\"/d/svc-trace-db?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        DB\n    </a>\n    <a href=\"/d/svc-trace-messaging?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Messaging\n    </a>\n    <a href=\"/d/svc-metric-jvm?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none; display: ${display_jvm};\">\n        JVM\n    </a>\n    <a href=\"/d/svc-metric-python?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none; display: ${display_python};\">\n        Python\n    </a>\n    <a href=\"/d/svc-metric-nodejs?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none; display: ${display_nodejs};\">\n        NodeJS\n    </a>\n  </div>\n</div>",
+        "content": "<div>\n  <h1>Services: ${service}</h1>\n  <div style=\"display:flex; gap:8px; border-bottom: 1px solid #333;\">\n    <a href=\"/d/svc-overview?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}&${__url_time_range}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Overview\n    </a>\n    <a href=\"/d/svc-metric?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}&${__url_time_range}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Metrics\n    </a>\n    <a href=\"/d/svc-log?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}&${__url_time_range}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Logs\n    </a>                                                                            \n        <a href=\"/d/svc-trace-http?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}&${__url_time_range}\"\n        style=\"padding:6px 16px; color:white; text-decoration:none; border-bottom: 1px solid #ff8833;\">\n        HTTP\n    </a>\n    <a href=\"/d/svc-trace-db?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}&${__url_time_range}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        DB\n    </a>\n    <a href=\"/d/svc-trace-messaging?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}&${__url_time_range}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Messaging\n    </a>\n    <a href=\"/d/svc-metric-jvm?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}&${__url_time_range}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none; display: ${display_jvm};\">\n        JVM\n    </a>\n    <a href=\"/d/svc-metric-python?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}&${__url_time_range}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none; display: ${display_python};\">\n        Python\n    </a>\n    <a href=\"/d/svc-metric-nodejs?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}&${__url_time_range}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none; display: ${display_nodejs};\">\n        NodeJS\n    </a>\n  </div>\n</div>",
         "mode": "html"
       },
       "pluginVersion": "12.4.2",
@@ -187,15 +187,15 @@
       "pluginVersion": "12.4.2",
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "editorMode": "code",
           "expr": "sum by (http_route) (\n  rate({\n  __name__=~\"http_server_request_duration_seconds_count|\",\n    service_name=~\"$service\",\n    http_route!~\"/actuator/health|/api/health\",\n    k8s_cluster_name=~\"$cluster\",\n    k8s_namespace_name=~\"$namespace\"\n  }[$__rate_interval])\n)\nor\nsum by (http_target) (\n  rate({\n    __name__=~\"http_server_duration_milliseconds_count\",\n    service_name=~\"$service\",\n    http_target!~\"/actuator/health|/api/health\",\n    k8s_cluster_name=~\"$cluster\",\n    k8s_namespace_name=~\"$namespace\"\n  }[$__rate_interval])\n)",
           "legendFormat": "{{http_route}}",
           "range": true,
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          }
+          "refId": "A"
         }
       ],
       "title": "요청수신 (by.URI)",
@@ -620,15 +620,15 @@
       "pluginVersion": "12.4.2",
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "editorMode": "code",
           "expr": "sum by (http_route) ({\n  __name__=~\"http_server_request_duration_seconds_count\",\n  service_name=~\"$service\",\n  http_route!=\"/actuator/health\",\n  http_response_status_code=~\"5.*\",\n  k8s_cluster_name=~\"$cluster\",\n  k8s_namespace_name=~\"$namespace\"\n})",
           "legendFormat": "{{http_route}}",
           "range": true,
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          }
+          "refId": "A"
         }
       ],
       "title": "에러응답 (by.URI)",
@@ -725,16 +725,16 @@
       "pluginVersion": "12.4.2",
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "editorMode": "code",
           "exemplar": false,
           "expr": "sum by (http_route) (\n  rate(http_server_request_duration_seconds_count{\n    service_name=~\"$service\",\n    http_route!=\"/actuator/health\",\n    k8s_cluster_name=~\"$cluster\",\n    k8s_namespace_name=~\"$namespace\"\n  }[5m])\n)\n-\nsum by (http_route) (\n  rate(http_server_request_duration_seconds_bucket{\n    service_name=~\"$service\",\n    le=\"0.01\", # 지연응답 기준(seconds)\n    http_route!=\"/actuator/health\",\n    k8s_cluster_name=~\"$cluster\",\n    k8s_namespace_name=~\"$namespace\"\n  }[5m])\n)",
           "legendFormat": "{{http_route}}",
           "range": true,
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          }
+          "refId": "A"
         }
       ],
       "title": "지연응답 (by.URI)",
@@ -914,13 +914,13 @@
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "Service Details > HTTP",
   "uid": "svc-trace-http",
-  "version": 26,
+  "version": 5,
   "weekStart": ""
 }

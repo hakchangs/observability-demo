@@ -103,7 +103,7 @@
           "showLineNumbers": false,
           "showMiniMap": false
         },
-        "content": "<div>\n  <h1>Services: ${service}</h1>\n  <div style=\"display:flex; gap:8px; border-bottom: 1px solid #333;\">\n    <a href=\"/d/svc-overview?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:white; text-decoration:none; border-bottom: 1px solid #ff8833;\">\n        Overview\n    </a>\n    <a href=\"/d/svc-metric?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Metrics\n    </a>\n    <a href=\"/d/svc-log?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Logs\n    </a>                                                                            \n        <a href=\"/d/svc-trace-http?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        HTTP\n    </a>\n    <a href=\"/d/svc-trace-db?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:white; text-decoration:none; border-bottom: 1px solid #ff8833;\">\n        DB\n    </a>\n    <a href=\"/d/svc-trace-messaging?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Messaging\n    </a>\n    <a href=\"/d/svc-metric-jvm?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none; display: ${display_jvm};\">\n        JVM\n    </a>\n    <a href=\"/d/svc-metric-python?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none; display: ${display_python};\">\n        Python\n    </a>\n    <a href=\"/d/svc-metric-nodejs?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none; display: ${display_nodejs};\">\n        NodeJS\n    </a>\n  </div>\n</div>",
+        "content": "<div>\n  <h1>Services: ${service}</h1>\n  <div style=\"display:flex; gap:8px; border-bottom: 1px solid #333;\">\n    <a href=\"/d/svc-overview?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}&${__url_time_range}\"\n        style=\"padding:6px 16px; color:white; text-decoration:none; border-bottom: 1px solid #ff8833;\">\n        Overview\n    </a>\n    <a href=\"/d/svc-metric?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}&${__url_time_range}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Metrics\n    </a>\n    <a href=\"/d/svc-log?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}&${__url_time_range}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Logs\n    </a>                                                                            \n        <a href=\"/d/svc-trace-http?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}&${__url_time_range}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        HTTP\n    </a>\n    <a href=\"/d/svc-trace-db?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}&${__url_time_range}\"\n        style=\"padding:6px 16px; color:white; text-decoration:none; border-bottom: 1px solid #ff8833;\">\n        DB\n    </a>\n    <a href=\"/d/svc-trace-messaging?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}&${__url_time_range}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none;\">\n        Messaging\n    </a>\n    <a href=\"/d/svc-metric-jvm?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}&${__url_time_range}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none; display: ${display_jvm};\">\n        JVM\n    </a>\n    <a href=\"/d/svc-metric-python?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}&${__url_time_range}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none; display: ${display_python};\">\n        Python\n    </a>\n    <a href=\"/d/svc-metric-nodejs?var-service=${service}&var-cluster=${cluster}&var-namespace=${namespace}&${__url_time_range}\"\n        style=\"padding:6px 16px; color:#aaa; text-decoration:none; display: ${display_nodejs};\">\n        NodeJS\n    </a>\n  </div>\n</div>",
         "mode": "html"
       },
       "pluginVersion": "12.4.2",
@@ -202,15 +202,15 @@
       "pluginVersion": "12.4.2",
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "editorMode": "code",
           "expr": "sum(db_client_connections_usage {\n  service_name=\"$service\",\n  state=\"used\"\n})",
           "legendFormat": "Used",
           "range": true,
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          }
+          "refId": "A"
         },
         {
           "datasource": {
@@ -624,15 +624,15 @@
       "pluginVersion": "12.4.2",
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "editorMode": "code",
           "expr": "sum(db_client_connections_pending_requests {\n  service_name=\"$service\"\n})",
           "legendFormat": "Pending",
           "range": true,
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          }
+          "refId": "A"
         }
       ],
       "title": "Connection 대기 건수",
@@ -755,15 +755,15 @@
       "pluginVersion": "12.4.2",
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "editorMode": "code",
           "expr": "rate(\n  db_client_connections_use_time_milliseconds_sum{\n    service_name=\"$service\"\n  }[5m]\n)\n/\nrate(\n  db_client_connections_use_time_milliseconds_count{\n    service_name=\"$service\"\n  }[5m]\n)",
           "legendFormat": "Connection 사용-반환 평균시간",
           "range": true,
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          }
+          "refId": "A"
         }
       ],
       "title": "Avg Hold Time",
@@ -886,15 +886,15 @@
       "pluginVersion": "12.4.2",
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "editorMode": "code",
           "expr": "histogram_quantile(\n  0.95,\n  rate(\n    db_client_connections_use_time_milliseconds_bucket{\n      service_name=\"$service\"\n    }[5m]\n  )\n)",
           "legendFormat": "Connection 사용-반환 시간",
           "range": true,
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          }
+          "refId": "A"
         }
       ],
       "title": "Hold Time (p95)",
@@ -1027,13 +1027,13 @@
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-3h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "Service Details > DB",
   "uid": "svc-trace-db",
-  "version": 21,
+  "version": 5,
   "weekStart": ""
 }
