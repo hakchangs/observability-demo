@@ -330,7 +330,6 @@
         "type": "query"
       },
       {
-        "allValue": "",
         "current": {},
         "datasource": {
           "type": "prometheus",
@@ -361,6 +360,6 @@
   "timezone": "browser",
   "title": "Service List",
   "uid": "svc-list",
-  "version": 14,
+  "version": 15,
   "weekStart": ""
 }
