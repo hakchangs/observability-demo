@@ -191,6 +191,6 @@
   "timezone": "browser",
   "title": "Service Graph",
   "uid": "svc-graph",
-  "version": 14,
+  "version": 15,
   "weekStart": ""
 }
