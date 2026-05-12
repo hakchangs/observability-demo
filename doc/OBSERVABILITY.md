@@ -456,3 +456,12 @@ sum by (service_name) (
 )
 ```
 
+### Grafana 퇴사처리
+
+CronJob 생성하여 OIDC 퇴사정보 획득 후 User 비활성 처리
+1. (Grafana API) 활성사용자 조회
+2. (OIDC API) 퇴사여부 확인
+3. (Grafana API) 퇴사자 비활성화 및 강제 로그아웃 처리
+
+> Grafana API: https://grafana.com/docs/grafana/latest/developer-resources/api-reference/http-api/api-legacy/authentication/
+> Grafana Swagger: http://grafana.platform.local/swagger (로컬 환경)
