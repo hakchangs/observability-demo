@@ -465,3 +465,58 @@ CronJob 생성하여 OIDC 퇴사정보 획득 후 User 비활성 처리
 
 > Grafana API: https://grafana.com/docs/grafana/latest/developer-resources/api-reference/http-api/api-legacy/authentication/
 > Grafana Swagger: http://grafana.platform.local/swagger (로컬 환경)
+
+### 더미 Telemetry 생성 
+
+로그 더미 생성
+```bash
+# 로그 전송 (속성으로 분류값 주입)
+OTEL_COLLECTOR=10.43.240.215
+
+### grpc 전송
+telemetrygen logs \
+  --otlp-endpoint 10.43.240.215:4317 \
+  --otlp-insecure \
+  --duration 10s \
+  --rate 5 \
+  --otlp-attributes 'log_category="app"' \
+  --otlp-attributes 'log_type="http"' \
+  --body "GET /api/users 200"
+
+### http 전송
+telemetrygen logs \
+  --otlp-endpoint 10.43.240.215:4318 \
+  --otlp-http \
+  --otlp-insecure \
+  --duration 10s \
+  --rate 5 \
+  --otlp-attributes 'log_category="audit"' \
+  --otlp-attributes 'log_type="http"' \
+  --service 'test' \
+  --body "GET /api/users 200"
+
+# sample#1 - http 요청 로그
+telemetrygen logs \
+  --otlp-endpoint 10.43.240.215:4318 \
+  --otlp-http \
+  --otlp-insecure \
+  --duration 5s \
+  --rate 1 \
+  --otlp-attributes 'log_category="app"' \
+  --otlp-attributes 'log_type="http"' \
+  --otlp-attributes 'http.method="GET"' \
+  --otlp-attributes 'http.url="/actuator/health"' \
+  --service 'dummy-gen'
+  --body '요청발생...body={"...": "...""}'
+
+
+# 로그 확인(LogQL)
+{
+    service_name="telemetrygen"
+} | log_category="app" 
+```
+
+> Telemetrygen: https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/cmd/telemetrygen/README.md
+> Telemetrygen Image: https://github.com/open-telemetry/opentelemetry-collector-contrib/pkgs/container/opentelemetry-collector-contrib%2Ftelemetrygen
+
+

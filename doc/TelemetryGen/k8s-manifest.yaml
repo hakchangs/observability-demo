@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: telemetrygen
+  namespace: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: telemetrygen
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: telemetrygen
+    spec:
+      containers:
+        - image: ghcr.io/open-telemetry/opentelemetry-collector-contrib/telemetrygen:v0.152.0
+          imagePullPolicy: Always
+          name: telemetrygen
+          args:
+            - "logs"
+            - "--otlp-endpoint=10.43.240.215:4318"
+            - "--otlp-http"
+            - "--otlp-insecure"
+            - "--rate=1"
+            - "--duration=10s"   # 30일
+            - "--otlp-attributes=log_category=\"app\""
+            - "--otlp-attributes=log_type=\"http\""
+            - "--body=baseline log"
