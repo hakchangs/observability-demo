@@ -519,4 +519,67 @@ telemetrygen logs \
 > Telemetrygen: https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/cmd/telemetrygen/README.md
 > Telemetrygen Image: https://github.com/open-telemetry/opentelemetry-collector-contrib/pkgs/container/opentelemetry-collector-contrib%2Ftelemetrygen
 
+### OTEL-Collector 자체 모니터링
+
+메트릭 속성 추가
+```yaml
+service:
+  telemetry:
+    resource:
+      attribute_key: 'attribute_value'
+```
+
+기본적으로 메트릭은 :8888 포트로 노출되며, 아래처럼 설정시 직접 Export 가능함.
+```yaml
+service:
+  telemetry:
+    metrics:
+      readers:
+        - periodic:
+            exporter:
+              otlp:
+                protocol: http/protobuf
+                endpoint: https://backend:4318
+```
+
+로그 Export 은 아래와 같이 설정할 수 있음 
+```yaml
+service:
+  telemetry:
+    logs:
+      processors:
+        - batch:
+            exporter:
+              otlp:
+                protocol: http/protobuf
+                endpoint: https://backend:4318
+```
+
+메트릭은 `otelcol_` 로 시작함. (detailed 메트릭은 `http_*`, `rpc_*` 도 존재)
+verbosity level(basic/normal/detailed) 에 따라 수집메트릭이 다름.
+
+Best Practice
+- Queue Length 체크: `Dropping data because sending_queue is full`
+  - 체크1. 전송 큐(sending queue) 가용공간을 확인.
+    - 가득 찼는지? > Sending Queue fail 대처
+    - 가용공간(capacity) 대비 현재 사용공간(size)을 비교하여 위험 확인
+  - 체크2. 전송 실패건수 확인
+    - metric/log/span 의 export 실패건수가 발생했는지? 얼마나 발생했는지?
+  - 대응방안. 전송 rate 를 낮추거나, collector 수평확장으로 대응
+- Receive Failures 체크
+  - 체크1. 지속적인 log/metric/span Receive 실패건 발생 (수신실패)
+    - 클라이언트의 실패가 너무 많이 발생하며 데이터 유실 가능성 생김
+    - 유실은 클라이언트 배포 방식에 따름
+  - 체크2. 지속적인 log/metric/span Export 실패건 발생 (전송실패)
+    - 전송실패가 너무 많이 발생하면 데이터 유실 가능성 생김
+    - 재시도 로직이 있어 무조건 유실되지는 않으나 지속적 발생은 이미 위험 신호
+    - 연관 이슈로 네트워크나 백엔드 저장소의 데이터 수신 문제를 의심해 볼 수 있음.
+  - 대응방안. 네트워크 이슈있는지 점검 or 백엔드 저장소 상태 확인
+- Data flow 체크
+  - 체크1. receive, export 흐름과 양을 확인
+
+> Internal Telemetry: https://opentelemetry.io/docs/collector/internal-telemetry/
+> 메트릭 네이밍 규칙: https://opentelemetry.io/docs/collector/internal-telemetry/#otelcol-prefix
+> 주요 메트릭: https://opentelemetry.io/docs/collector/internal-telemetry/#basic-level-metrics
+> 모니터링 Best Practice: https://opentelemetry.io/docs/collector/internal-telemetry/#use-internal-telemetry-to-monitor-the-collector
 
