@@ -1,3 +1,4 @@
+import {CompositePropagator, W3CBaggagePropagator, W3CTraceContextPropagator} from "@opentelemetry/core";
 import {resourceFromAttributes} from "@opentelemetry/resources";
 import {BatchSpanProcessor, WebTracerProvider} from "@opentelemetry/sdk-trace-web";
 import {OTLPTraceExporter} from "@opentelemetry/exporter-trace-otlp-http";
@@ -26,7 +27,14 @@ const provider = new WebTracerProvider({
     ],
 });
 
-provider.register();
+provider.register({
+    propagator: new CompositePropagator({
+        propagators: [
+            new W3CTraceContextPropagator(),
+            new W3CBaggagePropagator(),
+        ],
+    }),
+});
 
 registerInstrumentations({
     instrumentations: [
