@@ -21,7 +21,8 @@ const provider = new WebTracerProvider({
         // baggage 를 span attribute 로 저장
         new BaggageToAttributesProcessor(),
         new BatchSpanProcessor(
-            new OTLPTraceExporter({ url: `${window.location.origin}/api/otlp/v1/traces` }),
+            // new OTLPTraceExporter({ url: `${window.location.origin}/api/otlp/v1/traces` }),
+            new OTLPTraceExporter({ url: `http://otelcol.platform.local/v1/traces` }),
             { scheduledDelayMillis: 1000 },
         ),
     ],
