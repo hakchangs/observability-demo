@@ -40,7 +40,9 @@ provider.register({
 registerInstrumentations({
     instrumentations: [
         new DocumentLoadInstrumentation(),
-        new FetchInstrumentation(),
+        new FetchInstrumentation({
+            propagateTraceHeaderCorsUrls: [/.*/],
+        }),
     ],
 });
 
