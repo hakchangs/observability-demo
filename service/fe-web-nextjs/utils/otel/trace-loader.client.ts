@@ -42,7 +42,7 @@ registerInstrumentations({
     instrumentations: [
         new DocumentLoadInstrumentation(),
         new FetchInstrumentation({
-            // propagateTraceHeaderCorsUrls: [/.*/],
+            propagateTraceHeaderCorsUrls: [/.*/],
         }),
         new XMLHttpRequestInstrumentation({
             // propagateTraceHeaderCorsUrls: [/.*/],
