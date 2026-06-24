@@ -9,6 +9,7 @@ import {context, propagation} from "@opentelemetry/api";
 import {IS_PREFETCH, TraceSampler} from "@/utils/otel/trace-sampler.client";
 import {generateGuid} from "@/utils/otel/guid";
 import {BaggageToAttributesProcessor} from "@/utils/otel/baggage-span-processor";
+import {XMLHttpRequestInstrumentation} from "@opentelemetry/instrumentation-xml-http-request";
 
 const resource = resourceFromAttributes({
     'service.name': `${process.env.NEXT_PUBLIC_SERVICE_NAME ?? 'fe-web-nextjs'}-client`,
@@ -41,8 +42,11 @@ registerInstrumentations({
     instrumentations: [
         new DocumentLoadInstrumentation(),
         new FetchInstrumentation({
-            propagateTraceHeaderCorsUrls: [/.*/],
+            // propagateTraceHeaderCorsUrls: [/.*/],
         }),
+        new XMLHttpRequestInstrumentation({
+            // propagateTraceHeaderCorsUrls: [/.*/],
+        })
     ],
 });
 

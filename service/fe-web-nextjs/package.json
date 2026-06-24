@@ -16,6 +16,7 @@
     "@opentelemetry/instrumentation": "^0.200.0",
     "@opentelemetry/instrumentation-document-load": "^0.52.0",
     "@opentelemetry/instrumentation-fetch": "^0.200.0",
+    "@opentelemetry/instrumentation-xml-http-request": "^0.200.0",
     "@opentelemetry/resources": "^2.0.0",
     "@opentelemetry/sdk-trace-web": "^2.0.0",
     "loglevel": "^1.9.2",
