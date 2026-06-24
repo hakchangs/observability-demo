@@ -4,6 +4,8 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --legacy-peer-deps
 COPY . .
+ARG NEXT_PUBLIC_BFF_URL=""
+ENV NEXT_PUBLIC_BFF_URL=$NEXT_PUBLIC_BFF_URL
 RUN npm run build && mkdir -p .next/standalone/public
 
 FROM harbor.platform.local/dockerhub/library/node:20-alpine3.20
