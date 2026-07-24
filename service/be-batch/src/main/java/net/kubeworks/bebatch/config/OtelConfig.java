@@ -16,15 +16,15 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
+//@Configuration
 public class OtelConfig {
 
     private final Logger log = LoggerFactory.getLogger(OtelConfig.class);
 
-    @Bean
-    OpenTelemetry openTelemetry() {
-        return GlobalOpenTelemetry.get();   // agent SDK 재사용 — 이게 핵심
-    }
+//    @Bean
+//    OpenTelemetry openTelemetry() {
+//        return GlobalOpenTelemetry.get();   // agent SDK 재사용 — 이게 핵심
+//    }
 
 //    @Bean
 //    ObservationRegistry observationRegistry(MeterRegistry meterRegistry, Tracer tracer) {
@@ -35,31 +35,18 @@ public class OtelConfig {
 //        return registry;
 //    }
 
-    @Bean
-    ObservationRegistry batchObservationRegistry() {
-        var otel = GlobalOpenTelemetry.get();                 // agent SDK
-        var currentTraceContext = new OtelCurrentTraceContext();
-        var tracer = new OtelTracer(
-                otel.getTracer("spring-batch"),
-                currentTraceContext,
-                event -> {});                                  // EventPublisher no-op
-
-        var registry = ObservationRegistry.create();
-        registry.observationConfig()
-                .observationHandler(new DefaultTracingObservationHandler(tracer));
-        return registry;
-    }
-
-    @Bean
-    ApplicationRunner otelProbe() {
-        return args -> {
-            var otel = GlobalOpenTelemetry.get();
-            var span = otel.getTracer("probe").spanBuilder("probe-span").startSpan();
-            log.info("otel={} recording={} validSpanContext={}",
-                    otel.getClass().getName(),
-                    span.isRecording(),
-                    span.getSpanContext().isValid());
-            span.end();
-        };
-    }
+//    @Bean
+//    ObservationRegistry batchObservationRegistry() {
+//        var otel = GlobalOpenTelemetry.get();                 // agent SDK
+//        var currentTraceContext = new OtelCurrentTraceContext();
+//        var tracer = new OtelTracer(
+//                otel.getTracer("spring-batch"),
+//                currentTraceContext,
+//                event -> {});                                  // EventPublisher no-op
+//
+//        var registry = ObservationRegistry.create();
+//        registry.observationConfig()
+//                .observationHandler(new DefaultTracingObservationHandler(tracer));
+//        return registry;
+//    }
 }

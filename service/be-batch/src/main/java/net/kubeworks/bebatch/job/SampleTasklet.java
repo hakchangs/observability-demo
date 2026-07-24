@@ -19,9 +19,10 @@ public class SampleTasklet implements Tasklet {
         String jobName = chunkContext.getStepContext().getJobName();
         long instanceId = chunkContext.getStepContext().getStepExecution().getJobExecution().getJobInstance().getInstanceId();
 
-        Span span = Span.current();
-        span.setAttribute("batch.job.name", jobName);
-        span.setAttribute("batch.job.instance.id", instanceId);
+        // otel custom 필요한 경우 참고
+//        Span span = Span.current();
+//        span.setAttribute("batch.job.name", jobName);
+//        span.setAttribute("batch.job.instance.id", instanceId);
 
         log.info("batch job started: job={}, instanceId={}", jobName, instanceId);
 
@@ -32,7 +33,7 @@ public class SampleTasklet implements Tasklet {
         }
 
         contribution.incrementWriteCount(processed);
-        span.setAttribute("batch.items.processed", processed);
+//        span.setAttribute("batch.items.processed", processed);
         log.info("batch job completed: job={}, processed={}", jobName, processed);
 
         return RepeatStatus.FINISHED;
