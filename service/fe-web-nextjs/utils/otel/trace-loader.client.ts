@@ -9,7 +9,6 @@ import {context, propagation} from "@opentelemetry/api";
 import {IS_PREFETCH, TraceSampler} from "@/utils/otel/trace-sampler.client";
 import {generateGuid} from "@/utils/otel/guid";
 import {BaggageToAttributesProcessor} from "@/utils/otel/baggage-span-processor";
-import {XMLHttpRequestInstrumentation} from "@opentelemetry/instrumentation-xml-http-request";
 
 const resource = resourceFromAttributes({
     'service.name': `${process.env.NEXT_PUBLIC_SERVICE_NAME ?? 'fe-web-nextjs'}-client`,
@@ -22,8 +21,7 @@ const provider = new WebTracerProvider({
         // baggage 를 span attribute 로 저장
         new BaggageToAttributesProcessor(),
         new BatchSpanProcessor(
-            // new OTLPTraceExporter({ url: `${window.location.origin}/api/otlp/v1/traces` }),
-            new OTLPTraceExporter({ url: `http://otelcol.platform.local/v1/traces` }),
+            new OTLPTraceExporter({ url: `${window.location.origin}/api/otlp/v1/traces` }),
             { scheduledDelayMillis: 1000 },
         ),
     ],
@@ -41,12 +39,7 @@ provider.register({
 registerInstrumentations({
     instrumentations: [
         new DocumentLoadInstrumentation(),
-        new FetchInstrumentation({
-            propagateTraceHeaderCorsUrls: [/.*/],
-        }),
-        new XMLHttpRequestInstrumentation({
-            // propagateTraceHeaderCorsUrls: [/.*/],
-        })
+        new FetchInstrumentation(),
     ],
 });
 
