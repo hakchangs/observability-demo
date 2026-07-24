@@ -26,6 +26,10 @@
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
 
         <!-- OTel Custom 을 위한 기본 LIB -->
         <dependency>
@@ -34,10 +38,10 @@
             <version>1.60.1</version>
         </dependency>
         <!-- batch 6.x 호환을 위한 micrometer observation 추가 -->
-        <dependency>
-            <groupId>io.micrometer</groupId>
-            <artifactId>micrometer-tracing-bridge-otel</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>io.micrometer</groupId>-->
+<!--            <artifactId>micrometer-tracing-bridge-otel</artifactId>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>org.springframework.batch</groupId>
