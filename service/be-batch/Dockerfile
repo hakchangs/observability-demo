@@ -12,6 +12,4 @@ FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
 
-ENV JAVA_TOOL_OPTIONS=""
-
-ENTRYPOINT ["sh", "-c", "java $JAVA_TOOL_OPTIONS -jar app.jar"]
+ENTRYPOINT ["sh", "-c", "java -jar app.jar"]

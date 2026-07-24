@@ -30,9 +30,9 @@ public class MultiStepJobConfig {
     }
 
     @Bean
-    public Job multistepJob(Step firstStep) {
+    public Job multistepJob() {
         return new JobBuilder("multistepJob", jobRepository)
-                .start(firstStep)
+                .start(firstStep())
                 .next(secondStep())
                 .next(thirdStep())
                 .build();
