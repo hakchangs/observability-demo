@@ -8,6 +8,10 @@ import io.micrometer.observation.ObservationRegistry;
 //import io.micrometer.tracing.handler.TracingAwareMeterObservationHandler;
 //import io.micrometer.tracing.otel.bridge.OtelCurrentTraceContext;
 //import io.micrometer.tracing.otel.bridge.OtelTracer;
+import io.micrometer.tracing.Tracer;
+import io.micrometer.tracing.handler.TracingAwareMeterObservationHandler;
+import io.micrometer.tracing.otel.bridge.OtelCurrentTraceContext;
+import io.micrometer.tracing.otel.bridge.OtelTracer;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
 import org.slf4j.Logger;
@@ -16,24 +20,44 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-//@Configuration
+@Configuration
 public class OtelConfig {
 
     private final Logger log = LoggerFactory.getLogger(OtelConfig.class);
 
-//    @Bean
-//    OpenTelemetry openTelemetry() {
-//        return GlobalOpenTelemetry.get();   // agent SDK 재사용 — 이게 핵심
-//    }
+    @Bean
+    OpenTelemetry openTelemetry() {
+        return GlobalOpenTelemetry.get();   // agent SDK 재사용 — 이게 핵심
+    }
 
-//    @Bean
-//    ObservationRegistry observationRegistry(MeterRegistry meterRegistry, Tracer tracer) {
+    @Bean
+    public Tracer tracer() {
+        var otel = GlobalOpenTelemetry.get();
+        var currentTraceContext = new OtelCurrentTraceContext();
+        var tracer = new OtelTracer(
+                otel.getTracer("spring-batch"),
+                currentTraceContext,
+                event -> {}
+        );
+
+        return tracer;
+    }
+
+    @Bean
+    ObservationRegistry observationRegistry(MeterRegistry meterRegistry, Tracer tracer) {
+
+        DefaultMeterObservationHandler observationHandler = new DefaultMeterObservationHandler(meterRegistry);
+        ObservationRegistry observationRegistry = ObservationRegistry.create();
+        observationRegistry.observationConfig()
+                .observationHandler(new TracingAwareMeterObservationHandler<>(observationHandler, tracer));
+        return observationRegistry;
+
 //        var registry = ObservationRegistry.create();
 //        registry.observationConfig().observationHandler(
 //                new TracingAwareMeterObservationHandler<>(
 //                        new DefaultMeterObservationHandler(meterRegistry), tracer));
 //        return registry;
-//    }
+    }
 
 //    @Bean
 //    ObservationRegistry batchObservationRegistry() {
