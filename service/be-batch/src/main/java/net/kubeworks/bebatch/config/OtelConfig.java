@@ -1,47 +1,65 @@
 package net.kubeworks.bebatch.config;
 
-//import io.micrometer.core.instrument.MeterRegistry;
-//import io.micrometer.core.instrument.observation.DefaultMeterObservationHandler;
-//import io.micrometer.observation.ObservationRegistry;
-//import io.micrometer.tracing.Tracer;
-//import io.micrometer.tracing.handler.DefaultTracingObservationHandler;
-//import io.micrometer.tracing.handler.TracingAwareMeterObservationHandler;
-//import io.micrometer.tracing.otel.bridge.OtelCurrentTraceContext;
-//import io.micrometer.tracing.otel.bridge.OtelTracer;
-//import io.opentelemetry.api.GlobalOpenTelemetry;
-//import io.opentelemetry.api.OpenTelemetry;
-//import org.springframework.context.annotation.Bean;
-//import org.springframework.context.annotation.Configuration;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.observation.DefaultMeterObservationHandler;
+import io.micrometer.observation.ObservationRegistry;
+import io.micrometer.tracing.Tracer;
+import io.micrometer.tracing.handler.DefaultTracingObservationHandler;
+import io.micrometer.tracing.handler.TracingAwareMeterObservationHandler;
+import io.micrometer.tracing.otel.bridge.OtelCurrentTraceContext;
+import io.micrometer.tracing.otel.bridge.OtelTracer;
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.OpenTelemetry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-//@Configuration
+@Configuration
 public class OtelConfig {
 
+    private final Logger log = LoggerFactory.getLogger(OtelConfig.class);
+
+    @Bean
+    OpenTelemetry openTelemetry() {
+        return GlobalOpenTelemetry.get();   // agent SDK 재사용 — 이게 핵심
+    }
+
 //    @Bean
-//    OpenTelemetry openTelemetry() {
-//        return GlobalOpenTelemetry.get();   // agent SDK 재사용 — 이게 핵심
-//    }
-//
-////    @Bean
-////    ObservationRegistry observationRegistry(MeterRegistry meterRegistry, Tracer tracer) {
-////        var registry = ObservationRegistry.create();
-////        registry.observationConfig().observationHandler(
-////                new TracingAwareMeterObservationHandler<>(
-////                        new DefaultMeterObservationHandler(meterRegistry), tracer));
-////        return registry;
-////    }
-//
-//    @Bean
-//    ObservationRegistry batchObservationRegistry() {
-//        var otel = GlobalOpenTelemetry.get();                 // agent SDK
-//        var currentTraceContext = new OtelCurrentTraceContext();
-//        var tracer = new OtelTracer(
-//                otel.getTracer("spring-batch"),
-//                currentTraceContext,
-//                event -> {});                                  // EventPublisher no-op
-//
+//    ObservationRegistry observationRegistry(MeterRegistry meterRegistry, Tracer tracer) {
 //        var registry = ObservationRegistry.create();
-//        registry.observationConfig()
-//                .observationHandler(new DefaultTracingObservationHandler(tracer));
+//        registry.observationConfig().observationHandler(
+//                new TracingAwareMeterObservationHandler<>(
+//                        new DefaultMeterObservationHandler(meterRegistry), tracer));
 //        return registry;
 //    }
+
+    @Bean
+    ObservationRegistry batchObservationRegistry() {
+        var otel = GlobalOpenTelemetry.get();                 // agent SDK
+        var currentTraceContext = new OtelCurrentTraceContext();
+        var tracer = new OtelTracer(
+                otel.getTracer("spring-batch"),
+                currentTraceContext,
+                event -> {});                                  // EventPublisher no-op
+
+        var registry = ObservationRegistry.create();
+        registry.observationConfig()
+                .observationHandler(new DefaultTracingObservationHandler(tracer));
+        return registry;
+    }
+
+    @Bean
+    ApplicationRunner otelProbe() {
+        return args -> {
+            var otel = GlobalOpenTelemetry.get();
+            var span = otel.getTracer("probe").spanBuilder("probe-span").startSpan();
+            log.info("otel={} recording={} validSpanContext={}",
+                    otel.getClass().getName(),
+                    span.isRecording(),
+                    span.getSpanContext().isValid());
+            span.end();
+        };
+    }
 }
