@@ -38,6 +38,7 @@ public class ChunkStepJobConfig {
     public Job chunkStepJob() {
         return new JobBuilder("chunkStepJob", jobRepository)
                 .start(simpleChunkStep())
+                .next(jdbcChunkStep())
                 .build();
     }
 
