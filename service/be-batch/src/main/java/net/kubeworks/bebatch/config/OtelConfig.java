@@ -59,6 +59,8 @@ public class OtelConfig {
             @Override public boolean supportsContext(Observation.Context context) {
                 if (context.getName() != null) return false;
                 var name = context.getName();
+                log.info("[OBS] name={}, contextual={}, lowKeys={}",
+                        context.getName(), context.getContextualName(), context.getLowCardinalityKeyValues());
                 return (name.equals("spring.batch.job") || name.equals("spring.batch.step"))
                         && tracingHandler.supportsContext(context);
             }
