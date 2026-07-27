@@ -49,11 +49,11 @@ public class LongRunningProbeJobConfig {
     Step probeSlowStep() {
         return new StepBuilder("probeSlowStep", jobRepository)
                 .tasklet((c, ctx) -> {
-                    log.info("[SLOW] start — sleeping 60s");
+                    log.info("[SLOW] start — sleeping 180s");
                     // 10초마다 heartbeat 로그 — idle 판정 및 실시간 확인용
-                    for (int i = 1; i <= 6; i++) {
+                    for (int i = 1; i <= 18; i++) {
                         Thread.sleep(10_000);
-                        log.info("[SLOW] heartbeat {}/6", i);
+                        log.info("[SLOW] heartbeat {}/18", i);
                     }
                     log.info("[SLOW] done");
                     return RepeatStatus.FINISHED;
