@@ -70,8 +70,6 @@ public class OtelConfig {
             @Override public void onScopeOpened(Observation.Context context) { tracingHandler.onScopeOpened(context); }
             @Override public void onScopeClosed(Observation.Context context) { tracingHandler.onScopeClosed(context); }
         });
-        registry.observationConfig()
-                .observationHandler(tracingHandler);
         return registry;
     }
 }
