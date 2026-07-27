@@ -24,10 +24,12 @@ public class MultiStepJobConfig {
 
     private final Logger log = LoggerFactory.getLogger(MultiStepJobConfig.class);
 
+    private final DataSource dataSource;
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
 
-    public MultiStepJobConfig(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
+    public MultiStepJobConfig(DataSource dataSource, JobRepository jobRepository, PlatformTransactionManager transactionManager) {
+        this.dataSource = dataSource;
         this.jobRepository = jobRepository;
         this.transactionManager = transactionManager;
     }
@@ -76,7 +78,7 @@ public class MultiStepJobConfig {
     }
 
     @Bean
-    public Step thirdStep(DataSource dataSource) {
+    public Step thirdStep() {
 
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 
