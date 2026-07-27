@@ -14,7 +14,10 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.infrastructure.repeat.RepeatStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
+
+import javax.sql.DataSource;
 
 @Configuration
 public class MultiStepJobConfig {
@@ -73,7 +76,10 @@ public class MultiStepJobConfig {
     }
 
     @Bean
-    public Step thirdStep() {
+    public Step thirdStep(DataSource dataSource) {
+
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+
         return new StepBuilder("thirdStep", jobRepository)
                 .tasklet(new Tasklet() {
                     @Override
@@ -81,6 +87,8 @@ public class MultiStepJobConfig {
                         log.info("[thirdStep] start...");
 
                         // business logic
+                        Integer result = jdbcTemplate.queryForObject("SELECT 1", Integer.class);
+                        log.info("probe query result = {}", result);
 
                         log.info("[thirdStep] finish...");
                         return RepeatStatus.FINISHED;
