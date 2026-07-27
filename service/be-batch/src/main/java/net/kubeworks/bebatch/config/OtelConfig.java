@@ -39,10 +39,11 @@ public class OtelConfig {
         DefaultTracingObservationHandler observationHandler = new DefaultTracingObservationHandler(tracer);
         registry.observationConfig()
                 .observationHandler(observationHandler)
-                .observationPredicate((name, context)
-                        // span name 특정하여 수집 (metrics 수집에도 반영됨)
-                        -> name.equals("spring.batch.job") || name.equals("spring.batch.step")
-                );
+                .observationPredicate((name, context) -> {
+                    // span name 특정하여 수집 (metrics 수집에도 반영됨)
+                    log.info("[OBS Span Name] {}", name);
+                    return name.equals("spring.batch.job") || name.equals("spring.batch.step");
+                });
         return registry;
     }
 }
