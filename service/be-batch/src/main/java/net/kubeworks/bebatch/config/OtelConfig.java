@@ -36,8 +36,13 @@ public class OtelConfig {
     @Bean
     ObservationRegistry batchObservationRegistry(Tracer tracer) {
         var registry = ObservationRegistry.create();
+        DefaultTracingObservationHandler observationHandler = new DefaultTracingObservationHandler(tracer);
         registry.observationConfig()
-                .observationHandler(new DefaultTracingObservationHandler(tracer));
+                .observationHandler(observationHandler)
+                .observationPredicate((name, context)
+                        // span name 특정하여 수집 (metrics 수집에도 반영됨)
+                        -> name.equals("spring.batch.job") || name.equals("spring.batch.step")
+                );
         return registry;
     }
 }
