@@ -72,7 +72,6 @@ public class BatchJobLauncher {
                         .addNewEnv().withName("SPRING_BATCH_JOB_NAME").withValue(jobName).endEnv()
                         .addNewEnv().withName("TRACE_PARENT").withValue(traceparent == null ? "" : traceparent).endEnv()
                         .addNewEnv().withName("TRACE_STATE").withValue(tracestate).endEnv()
-                    //TODO: TRACE_PARENT 는 5단계에서 여기 추가
                     .endContainer().endSpec().endTemplate()
                 .endSpec()
                 .build();
