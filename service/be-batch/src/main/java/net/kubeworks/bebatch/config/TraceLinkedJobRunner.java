@@ -5,6 +5,7 @@ import io.opentelemetry.api.trace.*;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.context.propagation.TextMapGetter;
+import org.slf4j.MDC;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.parameters.JobParametersBuilder;
@@ -47,6 +48,10 @@ public class TraceLinkedJobRunner implements ApplicationRunner {
 
         Span root = builder.startSpan();
         try (Scope ignored = root.makeCurrent()) {
+
+            String guid = System.getenv("CORRELATION_GUID");
+            if (guid != null) MDC.put("guid", guid);
+
             Job job = jobRegistry.getJob(jobName);       // 없으면 예외 → 파드 Failed
             jobOperator.start(job, new JobParametersBuilder()
                     .addString("runDate", LocalDate.now().toString())
@@ -56,6 +61,7 @@ public class TraceLinkedJobRunner implements ApplicationRunner {
             root.recordException(e);
             throw e;
         } finally {
+            MDC.remove("guid");
             root.end();
         }
     }

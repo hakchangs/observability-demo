@@ -1,5 +1,6 @@
 package net.kubeworks.bebatch.config;
 
+import io.micrometer.common.KeyValue;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationHandler;
 import io.micrometer.observation.ObservationRegistry;
@@ -75,6 +76,7 @@ public class OtelConfig {
         var registry = ObservationRegistry.create();
         var tracingHandler = new DefaultTracingObservationHandler(tracer);
         registry.observationConfig().observationHandler(new ObservationHandler<>() {
+
             @Override public boolean supportsContext(Observation.Context context) {
                 if (context.getName() == null) return false;
                 var name = context.getName();
@@ -88,6 +90,17 @@ public class OtelConfig {
             @Override public void onError(Observation.Context context) { tracingHandler.onError(context); }
             @Override public void onScopeOpened(Observation.Context context) { tracingHandler.onScopeOpened(context); }
             @Override public void onScopeClosed(Observation.Context context) { tracingHandler.onScopeClosed(context); }
+
+        }).observationFilter(context -> {
+            String traceId = System.getenv("TRIGGER_TRACE_ID");
+            String corrId  = System.getenv("CORRELATION_GUID");
+            if (traceId != null && !traceId.isBlank()) {
+                context.addLowCardinalityKeyValue(KeyValue.of("trigger.trace_id", traceId));
+            }
+            if (corrId != null && !corrId.isBlank()) {
+                context.addLowCardinalityKeyValue(KeyValue.of("guid", corrId));
+            }
+            return context;
         });
         return registry;
     }
