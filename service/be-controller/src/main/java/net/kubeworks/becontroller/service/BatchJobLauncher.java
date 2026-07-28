@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Locale;
 
 @Service
 public class BatchJobLauncher {
@@ -39,7 +40,8 @@ public class BatchJobLauncher {
         JobSpec templateSpec = cron.getSpec().getJobTemplate().getSpec();
 
         // 2) 고유 이름 생성
-        String runId = jobName + "-" + Instant.now().toEpochMilli();
+        String safeName = sanitize(jobName);
+        String runId = safeName + "-" + Instant.now().toEpochMilli();
 
         // 3) 템플릿 스펙 재사용 + 실행별 env 주입
         Job job = new JobBuilder()
@@ -64,6 +66,15 @@ public class BatchJobLauncher {
         client.batch().v1().jobs().inNamespace(namespace).resource(job).create();
         log.info("launched batch job: run={} jobName={}", runId, jobName);
         return runId;
+    }
+
+    // k8s 리소스 이름 규칙(RFC 1123)에 맞게 정제
+    private String sanitize(String raw) {
+        String s = raw.toLowerCase(Locale.ROOT)
+                .replaceAll("[^a-z0-9-]", "-")   // 허용 외 문자 → -
+                .replaceAll("-+", "-")           // 연속 - 축약
+                .replaceAll("^-|-$", "");         // 앞뒤 - 제거
+        return s.isEmpty() ? "job" : s;
     }
 
 }
