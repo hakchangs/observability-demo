@@ -5,13 +5,17 @@ import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import io.fabric8.kubernetes.api.model.batch.v1.JobBuilder;
 import io.fabric8.kubernetes.api.model.batch.v1.JobSpec;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.context.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 @Service
 public class BatchJobLauncher {
@@ -43,6 +47,16 @@ public class BatchJobLauncher {
         String safeName = sanitize(jobName);
         String runId = safeName + "-" + Instant.now().toEpochMilli();
 
+        // 3) trace 정보 추출
+        Map<String, String> carrier = new HashMap<>();
+        GlobalOpenTelemetry.getPropagators().getTextMapPropagator()
+                .inject(Context.current(), carrier, (m, k, v) -> {
+                    if (m != null) m.put(k, v);
+                });
+
+        String traceparent = carrier.get("traceparent");
+        String tracestate  = carrier.getOrDefault("tracestate", "");
+
         // 3) 템플릿 스펙 재사용 + 실행별 env 주입
         Job job = new JobBuilder()
                 .withNewMetadata()
@@ -55,9 +69,9 @@ public class BatchJobLauncher {
                 .withSpec(templateSpec)                 // ← 스펙 공유
                 .editSpec()
                     .editTemplate().editSpec().editFirstContainer()
-                        .addNewEnv()
-                        .withName("SPRING_BATCH_JOB_NAME").withValue(jobName)
-                        .endEnv()
+                        .addNewEnv().withName("SPRING_BATCH_JOB_NAME").withValue(jobName).endEnv()
+                        .addNewEnv().withName("TRACE_PARENT").withValue(traceparent == null ? "" : traceparent).endEnv()
+                        .addNewEnv().withName("TRACE_STATE").withValue(tracestate).endEnv()
                     //TODO: TRACE_PARENT 는 5단계에서 여기 추가
                     .endContainer().endSpec().endTemplate()
                 .endSpec()
