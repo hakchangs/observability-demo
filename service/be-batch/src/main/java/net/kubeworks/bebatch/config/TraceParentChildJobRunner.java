@@ -5,7 +5,6 @@ import io.opentelemetry.api.trace.*;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.context.propagation.TextMapGetter;
-import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.parameters.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobOperator;
@@ -19,35 +18,32 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class TraceLinkedJobRunner implements ApplicationRunner {
+public class TraceParentChildJobRunner implements ApplicationRunner {
 
     private static final Tracer TRACER = GlobalOpenTelemetry.getTracer("batch-root");
 
     private final JobOperator jobOperator;
-    private final JobRegistry jobRegistry;
+    private final Map<String, Job> jobs;
 
     @Value("${spring.batch.job.name:}") private String jobName;
 
-    public TraceLinkedJobRunner(JobOperator jobOperator, JobRegistry jobRegistry) {
+    public TraceParentChildJobRunner(JobOperator jobOperator, Map<String, Job> jobs) {
         this.jobOperator = jobOperator;
-        this.jobRegistry = jobRegistry;
+        this.jobs = jobs;
     }
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        SpanContext linked = extractLinkedContext();
+        Context parentContext = extractParentContext();   // 원격 컨텍스트 복원
 
-        SpanBuilder builder = TRACER.spanBuilder(jobName)
-                .setSpanKind(SpanKind.CONSUMER)          // 비동기 작업 소비 의미
-                .setAttribute("batch.job.name", jobName);
+        Span root = TRACER.spanBuilder(jobName)
+                .setParent(parentContext)                  // ← link 대신 부모로 지정
+                .setSpanKind(SpanKind.CONSUMER)
+                .setAttribute("batch.job.name", jobName)
+                .startSpan();
 
-        if (linked.isValid()) {
-            builder.addLink(linked);                     // 컨트롤러 trace 로 연결
-        }
-
-        Span root = builder.startSpan();
         try (Scope ignored = root.makeCurrent()) {
-            Job job = jobRegistry.getJob(jobName);       // 없으면 예외 → 파드 Failed
+            Job job = resolveJob(jobName);
             jobOperator.start(job, new JobParametersBuilder()
                     .addString("runDate", LocalDate.now().toString())
                     .toJobParameters());
@@ -60,19 +56,27 @@ public class TraceLinkedJobRunner implements ApplicationRunner {
         }
     }
 
-    private SpanContext extractLinkedContext() {
+    private Context extractParentContext() {
         String tp = System.getenv("TRACE_PARENT");
-        if (tp == null || tp.isBlank()) return SpanContext.getInvalid();   // cron 경로
+        if (tp == null || tp.isBlank()) return Context.root();   // cron 경로 → 새 trace
 
         Map<String, String> carrier = new HashMap<>();
         carrier.put("traceparent", tp);
         carrier.put("tracestate", System.getenv().getOrDefault("TRACE_STATE", ""));
 
-        Context ctx = GlobalOpenTelemetry.getPropagators().getTextMapPropagator()
+        return GlobalOpenTelemetry.getPropagators().getTextMapPropagator()
                 .extract(Context.root(), carrier, new TextMapGetter<>() {
                     public Iterable<String> keys(Map<String, String> c) { return c.keySet(); }
                     public String get(Map<String, String> c, String k) { return c == null ? null : c.get(k); }
                 });
-        return Span.fromContext(ctx).getSpanContext();
+    }
+
+    private Job resolveJob(String requested) {
+        return jobs.values().stream()
+                .filter(j -> j.getName().equals(requested))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "Unknown job: '%s'. Available: %s".formatted(
+                                requested, jobs.values().stream().map(Job::getName).toList())));
     }
 }
