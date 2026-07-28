@@ -368,8 +368,8 @@ update-gitops-be-batch:
   script:
     - git clone $GITOPS_REPO gitops
     - cd gitops
-    - sed -i "s|harbor.platform.local/app/be-batch:.*|harbor.platform.local/app/be-batch:$IMAGE_TAG|g" apps/be-batch/job.yaml
-    - git add apps/be-batch/job.yaml
+    - sed -i "s|harbor.platform.local/app/be-batch:.*|harbor.platform.local/app/be-batch:$IMAGE_TAG|g" apps/be-batch/job.yaml apps/be-batch/cron-job.yaml
+    - git add apps/be-batch/job.yaml apps/be-batch/cron-job.yaml
     - 'git commit -m "ci: update be-batch image to $IMAGE_TAG"'
     - git push origin main
   tags: []
