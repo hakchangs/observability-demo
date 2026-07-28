@@ -6,6 +6,8 @@ import io.fabric8.kubernetes.api.model.batch.v1.JobBuilder;
 import io.fabric8.kubernetes.api.model.batch.v1.JobSpec;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.baggage.Baggage;
+import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +58,7 @@ public class BatchJobLauncher {
 
         String traceparent = carrier.get("traceparent");
         String tracestate  = carrier.getOrDefault("tracestate", "");
+        String guid = Baggage.current().getEntryValue("guid");
 
         // 3) 템플릿 스펙 재사용 + 실행별 env 주입
         Job job = new JobBuilder()
@@ -72,6 +75,7 @@ public class BatchJobLauncher {
                         .addNewEnv().withName("SPRING_BATCH_JOB_NAME").withValue(jobName).endEnv()
                         .addNewEnv().withName("TRACE_PARENT").withValue(traceparent == null ? "" : traceparent).endEnv()
                         .addNewEnv().withName("TRACE_STATE").withValue(tracestate).endEnv()
+                        .addNewEnv().withName("CORRELATION_GUID").withValue(guid).endEnv()
                     .endContainer().endSpec().endTemplate()
                 .endSpec()
                 .build();
