@@ -17,7 +17,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
-@Component
+//@Component
 public class TraceParentChildJobRunner implements ApplicationRunner {
 
     private static final Tracer TRACER = GlobalOpenTelemetry.getTracer("batch-root");
