@@ -3,7 +3,9 @@ package net.kubeworks.bebatch.sample.longrunning;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.job.Job;
+import org.springframework.batch.core.job.JobExecution;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.listener.JobExecutionListener;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -31,6 +33,17 @@ public class LongRunningProbeJobConfig {
                 .start(probeStep1())
                 .next(probeSlowStep())
                 .next(probeStep3())
+                .listener(new JobExecutionListener() {
+                    @Override
+                    public void beforeJob(JobExecution jobExecution) {
+                        log.info("beforeJob...");
+                    }
+
+                    @Override
+                    public void afterJob(JobExecution jobExecution) {
+                        log.info("afterJob...");
+                    }
+                })
                 .build();
     }
 
