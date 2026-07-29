@@ -76,6 +76,7 @@ public class BatchJobLauncher {
                         .addNewEnv().withName("TRACE_PARENT").withValue(traceparent == null ? "" : traceparent).endEnv()
                         .addNewEnv().withName("TRACE_STATE").withValue(tracestate).endEnv()
                         .addNewEnv().withName("CORRELATION_GUID").withValue(guid).endEnv()
+                        .addNewEnv().withName("TRIGGER_TRACE_ID").withValue(Span.current().getSpanContext().getTraceId()).endEnv()
                         .withArgs("guid=" + guid + ",java.lang.String,false")
                     .endContainer().endSpec().endTemplate()
                 .endSpec()
