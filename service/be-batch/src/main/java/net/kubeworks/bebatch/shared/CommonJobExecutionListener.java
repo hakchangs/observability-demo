@@ -17,7 +17,7 @@ public class CommonJobExecutionListener implements JobExecutionListener, Ordered
     public void beforeJob(JobExecution jobExecution) {
         log.info("beforeJob...");
         JobParameters params = jobExecution.getJobParameters();
-        log.info("job params = {}", params.getIdentifyingParameters());
+        log.info("job params = {}", params.parameters());
         log.info("guid param = {}", params.getString("guid"));
     }
 
