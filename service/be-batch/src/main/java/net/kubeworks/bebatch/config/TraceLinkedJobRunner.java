@@ -19,7 +19,9 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
-@Component
+// 활성시 확인사항
+// - spring.batch.job.enabled=false 반영
+//@Component
 public class TraceLinkedJobRunner implements ApplicationRunner {
 
     private static final Tracer TRACER = GlobalOpenTelemetry.getTracer("batch-root");
