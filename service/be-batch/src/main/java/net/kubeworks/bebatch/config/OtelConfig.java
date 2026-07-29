@@ -91,16 +91,16 @@ public class OtelConfig {
             @Override public void onScopeOpened(Observation.Context context) { tracingHandler.onScopeOpened(context); }
             @Override public void onScopeClosed(Observation.Context context) { tracingHandler.onScopeClosed(context); }
 
-//        }).observationFilter(context -> {
-//            String traceId = System.getenv("TRIGGER_TRACE_ID");
-//            String corrId  = System.getenv("CORRELATION_GUID");
-//            if (traceId != null && !traceId.isBlank()) {
-//                context.addLowCardinalityKeyValue(KeyValue.of("trigger.trace_id", traceId));
-//            }
-//            if (corrId != null && !corrId.isBlank()) {
-//                context.addLowCardinalityKeyValue(KeyValue.of("guid", corrId));
-//            }
-//            return context;
+        }).observationFilter(context -> {
+            String traceId = System.getenv("TRIGGER_TRACE_ID");
+            String corrId  = System.getenv("CORRELATION_GUID");
+            if (traceId != null && !traceId.isBlank()) {
+                context.addLowCardinalityKeyValue(KeyValue.of("trigger.trace_id", traceId));
+            }
+            if (corrId != null && !corrId.isBlank()) {
+                context.addLowCardinalityKeyValue(KeyValue.of("guid", corrId));
+            }
+            return context;
         });
         return registry;
     }
