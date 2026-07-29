@@ -1,4 +1,4 @@
-package net.kubeworks.bebatch.shared;
+package net.kubeworks.bebatch.shared.batch;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +21,8 @@ public class CommonJobExecutionListener implements JobExecutionListener, Ordered
         log.info("job params = {}", params.parameters());
         log.info("guid param = {}", params.getString("guid"));
 
+
+        // guid logRecord attribute 설정
         String guid = params.getString("guid");
         MDC.put("guid", guid);
     }

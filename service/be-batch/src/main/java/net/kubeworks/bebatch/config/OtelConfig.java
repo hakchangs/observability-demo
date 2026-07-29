@@ -78,6 +78,9 @@ public class OtelConfig {
         registry.observationConfig().observationHandler(new ObservationHandler<>() {
 
             @Override public boolean supportsContext(Observation.Context context) {
+
+                // job, step 만 수집하도록 설정 (chunk read/process/write 제외)
+
                 if (context.getName() == null) return false;
                 var name = context.getName();
                 log.info("[OBS] name={}, contextual={}, lowKeys={}",
@@ -92,6 +95,9 @@ public class OtelConfig {
             @Override public void onScopeClosed(Observation.Context context) { tracingHandler.onScopeClosed(context); }
 
         }).observationFilter(context -> {
+
+            // guid span attribute 주입설정
+
             String traceId = System.getenv("TRIGGER_TRACE_ID");
             String corrId  = System.getenv("CORRELATION_GUID");
             if (traceId != null && !traceId.isBlank()) {
