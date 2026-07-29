@@ -1,52 +1,60 @@
 package net.kubeworks.bebatch.shared.otel;
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
-import io.opentelemetry.api.trace.*;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.context.propagation.TextMapGetter;
-import org.springframework.batch.core.job.Job;
-import org.springframework.batch.core.job.parameters.JobParametersBuilder;
-import org.springframework.batch.core.launch.JobOperator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.batch.autoconfigure.JobLauncherApplicationRunner;
+import org.springframework.core.Ordered;
 
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
-//@Component
-public class TraceParentChildJobRunner implements ApplicationRunner {
+public class TraceAwareRunner implements ApplicationRunner, Ordered {
 
+    private final Logger log = LoggerFactory.getLogger(TraceAwareRunner.class);
     private static final Tracer TRACER = GlobalOpenTelemetry.getTracer("batch-root");
 
-    private final JobOperator jobOperator;
-    private final Map<String, Job> jobs;
+    private final JobLauncherApplicationRunner delegate;
+    @Value("${spring.batch.job.name:}")
+    private String jobName;
 
-    @Value("${spring.batch.job.name:}") private String jobName;
-
-    public TraceParentChildJobRunner(JobOperator jobOperator, Map<String, Job> jobs) {
-        this.jobOperator = jobOperator;
-        this.jobs = jobs;
+    public TraceAwareRunner(JobLauncherApplicationRunner delegate) {
+        this.delegate = delegate;
     }
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        Context parentContext = extractParentContext();   // 원격 컨텍스트 복원
 
+        // 1. 부모 trace 정보 준비
+        log.info("start...jobName={}", jobName);
+        Context parentContext = extractParentContext();
+
+        // 2. 부모 trace 기반 span 생성
         Span root = TRACER.spanBuilder(jobName)
-                .setParent(parentContext)                  // ← link 대신 부모로 지정
+                .setParent(parentContext)
                 .setSpanKind(SpanKind.CONSUMER)
                 .setAttribute("batch.job.name", jobName)
                 .startSpan();
 
-        try (Scope ignored = root.makeCurrent()) {
+        // 3. span 범위내에서 작업 시작
+        try (Scope scope = root.makeCurrent()) {
 
-            Job job = resolveJob(jobName);
-            jobOperator.start(job, new JobParametersBuilder()
-                    .addString("runDate", LocalDate.now().toString())
-                    .toJobParameters());
+            log.info("runner start...args={}", args);
+
+            // JobLauncherApplicationRunner 그대로 실행
+            delegate.run(args);
+
+            log.info("runner end...");
 
         } catch (Exception e) {
             root.setStatus(StatusCode.ERROR);
@@ -57,9 +65,14 @@ public class TraceParentChildJobRunner implements ApplicationRunner {
         }
     }
 
+    @Override
+    public int getOrder() {
+        return delegate.getOrder();
+    }
+
     private Context extractParentContext() {
         String tp = System.getenv("TRACE_PARENT");
-        if (tp == null || tp.isBlank()) return Context.root();   // cron 경로 → 새 trace
+        if (tp == null || tp.isBlank()) return Context.root();
 
         Map<String, String> carrier = new HashMap<>();
         carrier.put("traceparent", tp);
@@ -70,14 +83,5 @@ public class TraceParentChildJobRunner implements ApplicationRunner {
                     public Iterable<String> keys(Map<String, String> c) { return c.keySet(); }
                     public String get(Map<String, String> c, String k) { return c == null ? null : c.get(k); }
                 });
-    }
-
-    private Job resolveJob(String requested) {
-        return jobs.values().stream()
-                .filter(j -> j.getName().equals(requested))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException(
-                        "Unknown job: '%s'. Available: %s".formatted(
-                                requested, jobs.values().stream().map(Job::getName).toList())));
     }
 }

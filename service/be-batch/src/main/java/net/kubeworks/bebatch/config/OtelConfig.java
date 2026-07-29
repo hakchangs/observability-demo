@@ -10,10 +10,13 @@ import io.micrometer.tracing.otel.bridge.OtelCurrentTraceContext;
 import io.micrometer.tracing.otel.bridge.OtelTracer;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
+import net.kubeworks.bebatch.shared.otel.TraceAwareRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.support.MapJobRegistry;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.boot.batch.autoconfigure.JobLauncherApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -41,6 +44,19 @@ public class OtelConfig {
                 currentTraceContext,
                 event -> {}             // EventPublisher no-op
         );
+    }
+
+    @Bean
+    static BeanPostProcessor traceContextRunnerWrapper() {
+        return new BeanPostProcessor() {
+            @Override
+            public Object postProcessAfterInitialization(Object bean, String name) {
+                if (bean instanceof JobLauncherApplicationRunner runner) {
+                    return new TraceAwareRunner(runner);
+                }
+                return bean;
+            }
+        };
     }
 
 //    @Bean
