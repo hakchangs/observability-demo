@@ -1,5 +1,6 @@
 package net.kubeworks.bebatch.sample.longrunning;
 
+import net.kubeworks.bebatch.shared.CommonJobExecutionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.job.Job;
@@ -26,11 +27,12 @@ public class LongRunningProbeJobConfig {
     }
 
     @Bean
-    Job longProbeJob() {
+    Job longProbeJob(CommonJobExecutionListener listener) {
         return new JobBuilder("longProbeJob", jobRepository)
                 .start(probeStep1())
                 .next(probeSlowStep())
                 .next(probeStep3())
+                .listener(listener)
                 .build();
     }
 
