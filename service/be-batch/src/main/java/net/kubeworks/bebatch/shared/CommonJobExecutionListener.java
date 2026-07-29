@@ -1,8 +1,7 @@
 package net.kubeworks.bebatch.shared;
 
-import io.opentelemetry.api.baggage.Baggage;
-import io.opentelemetry.context.Context;
-import io.opentelemetry.context.Scope;
+import io.micrometer.tracing.BaggageInScope;
+import io.micrometer.tracing.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -17,7 +16,12 @@ public class CommonJobExecutionListener implements JobExecutionListener, Ordered
 
     private final Logger log = LoggerFactory.getLogger(CommonJobExecutionListener.class);
 
-    private static final ThreadLocal<Scope> BAGGAGE_SCOPE = new ThreadLocal<>();
+    private final Tracer tracer;
+    private BaggageInScope guidBaggage;
+
+    public CommonJobExecutionListener(Tracer tracer) {
+        this.tracer = tracer;
+    }
 
     @Override
     public void beforeJob(JobExecution jobExecution) {
@@ -28,18 +32,25 @@ public class CommonJobExecutionListener implements JobExecutionListener, Ordered
 
         String guid = params.getString("guid");
         if (guid != null && !guid.isBlank()) {
-            MDC.put("guid", guid);
-            Baggage baggage = Baggage.current().toBuilder().put("guid", guid).build();
-            Scope scope = baggage.storeInContext(Context.current()).makeCurrent();
-            BAGGAGE_SCOPE.set(scope);
+            // Micrometer 계층에서 baggage 생성 + scope 오픈
+            this.guidBaggage = tracer.createBaggageInScope("guid", guid);
+            MDC.put("guid", guid);   // 로그용은 명시적으로
         }
     }
 
     @Override
     public void afterJob(JobExecution jobExecution) {
         log.info("afterJob...");
-        Scope scope = BAGGAGE_SCOPE.get();
-        if (scope != null) { scope.close(); BAGGAGE_SCOPE.remove(); }
+
+        if (guidBaggage != null) {
+            try {
+                guidBaggage.close();
+            } catch (Exception e) {
+                log.warn("baggage close failed", e);
+            } finally {
+                guidBaggage = null;
+            }
+        }
         MDC.remove("guid");
     }
 
