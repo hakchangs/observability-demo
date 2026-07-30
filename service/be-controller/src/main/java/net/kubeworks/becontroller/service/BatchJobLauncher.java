@@ -77,10 +77,10 @@ public class BatchJobLauncher {
                 .editSpec()
                     .editTemplate().editSpec().editFirstContainer()
                         .addNewEnv().withName("SPRING_BATCH_JOB_NAME").withValue(jobName).endEnv()
-                        //
+                        // otel 연관값 환경변수로 전달
                         .addNewEnv().withName("TRACE_PARENT").withValue(traceparent == null ? "" : traceparent).endEnv()
                         .addNewEnv().withName("TRACE_STATE").withValue(tracestate).endEnv()
-                        // GUID 전파
+                        .addNewEnv().withName("BAGGAGE").withValue(baggage).endEnv()
                         .addNewEnv().withName("CORRELATION_GUID").withValue(guid).endEnv()
                         .withArgs("guid=" + guid + ",java.lang.String,false") //Job Parameter 주입을 위해 Args 로 전달
                     .endContainer().endSpec().endTemplate()
