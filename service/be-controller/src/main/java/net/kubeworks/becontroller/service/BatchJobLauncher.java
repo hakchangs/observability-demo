@@ -58,6 +58,10 @@ public class BatchJobLauncher {
 
         String traceparent = carrier.get("traceparent");
         String tracestate  = carrier.getOrDefault("tracestate", "");
+        log.info("propagated carrier={}", carrier);
+
+        String baggage = carrier.get("baggage");
+        log.info("baggage={}", baggage);
         String guid = Baggage.current().getEntryValue("guid");
 
         // 3) 템플릿 스펙 재사용 + 실행별 env 주입
@@ -69,15 +73,16 @@ public class BatchJobLauncher {
                     .addToLabels("trigger", "on-demand")
                     .addToLabels("batch-job-name", jobName)
                 .endMetadata()
-                .withSpec(templateSpec)                 // ← 스펙 공유
+                .withSpec(templateSpec)
                 .editSpec()
                     .editTemplate().editSpec().editFirstContainer()
                         .addNewEnv().withName("SPRING_BATCH_JOB_NAME").withValue(jobName).endEnv()
+                        //
                         .addNewEnv().withName("TRACE_PARENT").withValue(traceparent == null ? "" : traceparent).endEnv()
                         .addNewEnv().withName("TRACE_STATE").withValue(tracestate).endEnv()
+                        // GUID 전파
                         .addNewEnv().withName("CORRELATION_GUID").withValue(guid).endEnv()
-                        .addNewEnv().withName("TRIGGER_TRACE_ID").withValue(Span.current().getSpanContext().getTraceId()).endEnv()
-                        .withArgs("guid=" + guid + ",java.lang.String,false")
+                        .withArgs("guid=" + guid + ",java.lang.String,false") //Job Parameter 주입을 위해 Args 로 전달
                     .endContainer().endSpec().endTemplate()
                 .endSpec()
                 .build();
