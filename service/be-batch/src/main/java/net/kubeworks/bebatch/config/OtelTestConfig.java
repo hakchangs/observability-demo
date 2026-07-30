@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.support.MapJobRegistry;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.batch.autoconfigure.JobLauncherApplicationRunner;
 import org.springframework.context.annotation.Bean;
@@ -47,12 +48,12 @@ public class OtelTestConfig {
     }
 
     @Bean
-    static BeanPostProcessor traceContextRunnerWrapper() {
+    static BeanPostProcessor traceContextRunnerWrapper(@Value("${spring.batch.job.name:}") String jobName) {
         return new BeanPostProcessor() {
             @Override
             public Object postProcessAfterInitialization(Object bean, String name) {
                 if (bean instanceof JobLauncherApplicationRunner runner) {
-                    return new TraceAwareRunner(runner);
+                    return new TraceAwareRunner(runner, jobName);
                 }
                 return bean;
             }
