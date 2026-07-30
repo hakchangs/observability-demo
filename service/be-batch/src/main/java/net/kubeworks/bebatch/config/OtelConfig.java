@@ -10,6 +10,7 @@ import io.micrometer.tracing.otel.bridge.OtelCurrentTraceContext;
 import io.micrometer.tracing.otel.bridge.OtelTracer;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.baggage.Baggage;
 import net.kubeworks.bebatch.shared.otel.TraceAwareRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,11 +75,20 @@ public class OtelConfig {
             @Override public void onScopeClosed(Observation.Context context) { tracingHandler.onScopeClosed(context); }
 
         }).observationFilter(context -> {
+
+            Baggage otelBaggage = Baggage.current();
+
+            log.info("[OBS] filter start...baggage={}", otelBaggage);
+
             // guid span attribute 주입설정
-            String corrId  = System.getenv("CORRELATION_GUID");
-            if (corrId != null && !corrId.isBlank()) {
-                context.addLowCardinalityKeyValue(KeyValue.of("guid", corrId));
+//            String guid  = System.getenv("CORRELATION_GUID");
+            String guid = otelBaggage.getEntryValue("guid");
+            if (guid != null && !guid.isBlank()) {
+                context.addLowCardinalityKeyValue(KeyValue.of("guid", guid));
             }
+
+            log.info("[OBS] filter end...");
+
             return context;
         });
         return registry;
