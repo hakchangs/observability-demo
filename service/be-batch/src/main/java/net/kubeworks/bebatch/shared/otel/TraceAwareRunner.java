@@ -44,18 +44,18 @@ public class TraceAwareRunner implements ApplicationRunner, Ordered {
         // 1. 부모 trace 정보 준비
         log.debug("start...jobName={}", jobName);
         Context parentContext = extractParentContext();
+        String guid = Baggage.fromContext(parentContext).getEntryValue("guid");
+        if (guid == null || guid.isBlank()) {
+            guid = generateGuid();
+        }
 
         // 2. 부모 trace 기반 span 생성
         Span root = TRACER.spanBuilder(jobName)
                 .setParent(parentContext)
                 .setSpanKind(SpanKind.CONSUMER)
                 .setAttribute("batch.job.name", jobName)
+                .setAttribute("guid", guid)
                 .startSpan();
-
-        String guid = Baggage.fromContext(parentContext).getEntryValue("guid");
-        if (guid == null || guid.isBlank()) {
-            guid = generateGuid();
-        }
 
         // 3. span 범위내에서 작업 시작
         Context rootContext = parentContext.with(root);
@@ -70,6 +70,7 @@ public class TraceAwareRunner implements ApplicationRunner, Ordered {
                     .setParent(Context.current())
                     .setSpanKind(SpanKind.INTERNAL)
                     .setAttribute("batch.job.name", jobName)
+                    .setAttribute("guid", guid)
                     .startSpan();
             started.end();
 
