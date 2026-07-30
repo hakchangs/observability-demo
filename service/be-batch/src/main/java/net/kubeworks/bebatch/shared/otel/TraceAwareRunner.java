@@ -48,12 +48,22 @@ public class TraceAwareRunner implements ApplicationRunner, Ordered {
                 .startSpan();
 
         // 3. span 범위내에서 작업 시작
-        try (Scope scope = parentContext.makeCurrent()) {
+        try (Scope scope = root.makeCurrent()) {
 
             log.debug("delegate runner start...args={}", args);
 
             String guid = Baggage.current().getEntryValue("guid");
-            MDC.put("guid", guid); //log 에 guid 주입설정
+            if (guid != null) {
+                MDC.put("guid", guid); //log 에 guid 주입설정
+            }
+
+            // 배치 실행여부 마킹
+            Span started = TRACER.spanBuilder("batch.execution.started")
+                    .setParent(Context.current())
+                    .setSpanKind(SpanKind.INTERNAL)
+                    .setAttribute("batch.job.name", jobName)
+                    .startSpan();
+            started.end();
 
             // JobLauncherApplicationRunner 그대로 실행
             delegate.run(args);
