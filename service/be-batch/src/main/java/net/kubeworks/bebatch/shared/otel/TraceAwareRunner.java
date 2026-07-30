@@ -17,13 +17,18 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.batch.autoconfigure.JobLauncherApplicationRunner;
 import org.springframework.core.Ordered;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class TraceAwareRunner implements ApplicationRunner, Ordered {
 
     private final Logger log = LoggerFactory.getLogger(TraceAwareRunner.class);
     private static final Tracer TRACER = GlobalOpenTelemetry.getTracer("batch-root");
+    private static final DateTimeFormatter FORMATTER =
+            DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
 
     private final JobLauncherApplicationRunner delegate;
     private final String jobName;
@@ -47,16 +52,18 @@ public class TraceAwareRunner implements ApplicationRunner, Ordered {
                 .setAttribute("batch.job.name", jobName)
                 .startSpan();
 
+        String guid = Baggage.fromContext(parentContext).getEntryValue("guid");
+        if (guid == null || guid.isBlank()) {
+            guid = generateGuid();
+        }
+
         // 3. span 범위내에서 작업 시작
         Context rootContext = parentContext.with(root);
-        try (Scope scope = rootContext.makeCurrent()) {
+        Baggage newBaggage = Baggage.fromContext(parentContext).toBuilder().put("guid", guid).build();
+        try (Scope scope = newBaggage.storeInContext(rootContext).makeCurrent()) {
 
             log.debug("delegate runner start...args={}", args);
-
-            String guid = Baggage.current().getEntryValue("guid");
-            if (guid != null) {
-                MDC.put("guid", guid); //log 에 guid 주입설정
-            }
+            MDC.put("guid", guid); //log 에 guid 주입설정
 
             // 배치 실행여부 마킹
             Span started = TRACER.spanBuilder("batch.execution.started")
@@ -88,6 +95,7 @@ public class TraceAwareRunner implements ApplicationRunner, Ordered {
 
     private Context extractParentContext() {
         String traceParent = System.getenv("TRACE_PARENT");
+        //TRACE_PARENT 없는경우 자체 Span 으로 시작.
         if (traceParent == null || traceParent.isBlank()) return Context.root();
 
         Map<String, String> carrier = new HashMap<>();
@@ -100,5 +108,11 @@ public class TraceAwareRunner implements ApplicationRunner, Ordered {
                     public Iterable<String> keys(Map<String, String> c) { return c.keySet(); }
                     public String get(Map<String, String> c, String k) { return c == null ? null : c.get(k); }
                 });
+    }
+
+    private String generateGuid() {
+        String timestamp = LocalDateTime.now().format(FORMATTER);
+        long random = ThreadLocalRandom.current().nextLong(0, 10_000_000_000L);
+        return timestamp + "LTP" + String.format("%010d", random);
     }
 }
