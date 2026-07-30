@@ -12,7 +12,6 @@ import io.opentelemetry.context.propagation.TextMapGetter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.batch.autoconfigure.JobLauncherApplicationRunner;
@@ -27,18 +26,18 @@ public class TraceAwareRunner implements ApplicationRunner, Ordered {
     private static final Tracer TRACER = GlobalOpenTelemetry.getTracer("batch-root");
 
     private final JobLauncherApplicationRunner delegate;
-    @Value("${spring.batch.job.name:}")
-    private String jobName;
+    private final String jobName;
 
-    public TraceAwareRunner(JobLauncherApplicationRunner delegate) {
+    public TraceAwareRunner(JobLauncherApplicationRunner delegate, String jobName) {
         this.delegate = delegate;
+        this.jobName = jobName;
     }
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
 
         // 1. 부모 trace 정보 준비
-        log.info("start...jobName={}", jobName);
+        log.debug("start...jobName={}", jobName);
         Context parentContext = extractParentContext();
 
         // 2. 부모 trace 기반 span 생성
@@ -51,15 +50,15 @@ public class TraceAwareRunner implements ApplicationRunner, Ordered {
         // 3. span 범위내에서 작업 시작
         try (Scope scope = parentContext.makeCurrent()) {
 
-            log.info("runner start...args={}", args);
+            log.debug("delegate runner start...args={}", args);
 
             String guid = Baggage.current().getEntryValue("guid");
-            MDC.put("guid", guid);
+            MDC.put("guid", guid); //log 에 guid 주입설정
 
             // JobLauncherApplicationRunner 그대로 실행
             delegate.run(args);
 
-            log.info("runner end...");
+            log.debug("delegate runner end...");
 
         } catch (Exception e) {
             root.setStatus(StatusCode.ERROR);
@@ -77,11 +76,11 @@ public class TraceAwareRunner implements ApplicationRunner, Ordered {
     }
 
     private Context extractParentContext() {
-        String tp = System.getenv("TRACE_PARENT");
-        if (tp == null || tp.isBlank()) return Context.root();
+        String traceParent = System.getenv("TRACE_PARENT");
+        if (traceParent == null || traceParent.isBlank()) return Context.root();
 
         Map<String, String> carrier = new HashMap<>();
-        carrier.put("traceparent", tp);
+        carrier.put("traceparent", traceParent);
         carrier.put("tracestate", System.getenv().getOrDefault("TRACE_STATE", ""));
         carrier.put("baggage", System.getenv().getOrDefault("BAGGAGE", ""));
 

@@ -9,3 +9,6 @@ spring:
       initialize-schema: always
 #    job:
 #      enabled: false
+logging:
+  level:
+    net.kubeworks.bebatch: debug
