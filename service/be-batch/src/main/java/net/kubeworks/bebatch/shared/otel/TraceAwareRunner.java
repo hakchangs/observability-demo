@@ -48,7 +48,8 @@ public class TraceAwareRunner implements ApplicationRunner, Ordered {
                 .startSpan();
 
         // 3. span 범위내에서 작업 시작
-        try (Scope scope = root.makeCurrent()) {
+        Context rootContext = parentContext.with(root);
+        try (Scope scope = rootContext.makeCurrent()) {
 
             log.debug("delegate runner start...args={}", args);
 
