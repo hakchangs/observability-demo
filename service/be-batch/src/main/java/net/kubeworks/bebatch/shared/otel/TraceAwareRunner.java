@@ -1,6 +1,7 @@
 package net.kubeworks.bebatch.shared.otel;
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.baggage.Baggage;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.StatusCode;
@@ -10,6 +11,7 @@ import io.opentelemetry.context.Scope;
 import io.opentelemetry.context.propagation.TextMapGetter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -51,6 +53,9 @@ public class TraceAwareRunner implements ApplicationRunner, Ordered {
 
             log.info("runner start...args={}", args);
 
+            String guid = Baggage.current().getEntryValue("guid");
+            MDC.put("guid", guid);
+
             // JobLauncherApplicationRunner 그대로 실행
             delegate.run(args);
 
@@ -62,6 +67,7 @@ public class TraceAwareRunner implements ApplicationRunner, Ordered {
             throw e;
         } finally {
             root.end();
+            MDC.remove("guid");
         }
     }
 
@@ -77,6 +83,7 @@ public class TraceAwareRunner implements ApplicationRunner, Ordered {
         Map<String, String> carrier = new HashMap<>();
         carrier.put("traceparent", tp);
         carrier.put("tracestate", System.getenv().getOrDefault("TRACE_STATE", ""));
+        carrier.put("baggage", System.getenv().getOrDefault("BAGGAGE", ""));
 
         return GlobalOpenTelemetry.getPropagators().getTextMapPropagator()
                 .extract(Context.root(), carrier, new TextMapGetter<>() {

@@ -13,19 +13,30 @@ import io.opentelemetry.api.OpenTelemetry;
 import net.kubeworks.bebatch.shared.otel.TraceAwareRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.configuration.JobRegistry;
+import org.springframework.batch.core.configuration.support.MapJobRegistry;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.batch.autoconfigure.JobLauncherApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
-public class OtelConfig {
+//@Configuration
+public class OtelTestConfig {
 
-    private final Logger log = LoggerFactory.getLogger(OtelConfig.class);
+    private final Logger log = LoggerFactory.getLogger(OtelTestConfig.class);
 
-    // OTEL Agent - Micrometer 브리지 설정
     @Bean
-    Tracer bridgetracer() {
+    JobRegistry jobRegistry() {
+        return new MapJobRegistry();
+    }
+
+    @Bean
+    OpenTelemetry openTelemetry() {
+        return GlobalOpenTelemetry.get();   // agent SDK 재사용
+    }
+
+    @Bean
+    Tracer tracer() {
         var otel = GlobalOpenTelemetry.get();   // agent SDK
         var currentTraceContext = new OtelCurrentTraceContext();
         return new OtelTracer(
@@ -35,7 +46,6 @@ public class OtelConfig {
         );
     }
 
-    // spring-batch Job 실행주기에 otel 연동 wrapping
     @Bean
     static BeanPostProcessor traceContextRunnerWrapper() {
         return new BeanPostProcessor() {
@@ -49,7 +59,34 @@ public class OtelConfig {
         };
     }
 
-    // micrometer 수집설정 변경: 수집대상 span 결정, guid 속성 주입
+//    @Bean
+//    ObservationRegistry batchObservationRegistry(Tracer tracer) {
+//        var registry = ObservationRegistry.create();
+//        DefaultTracingObservationHandler observationHandler = new DefaultTracingObservationHandler(tracer);
+//        registry.observationConfig()
+//                .observationHandler(observationHandler);
+//        return registry;
+//    }
+
+
+    ///// span 필터링 처리방법
+
+    //방법1. predicate 필터링: span 외 metrics 수집에도 제외규칙 적용됨
+//    @Bean
+//    ObservationRegistry batchObservationRegistry(Tracer tracer) {
+//        var registry = ObservationRegistry.create();
+//        DefaultTracingObservationHandler observationHandler = new DefaultTracingObservationHandler(tracer);
+//        registry.observationConfig()
+//                .observationHandler(observationHandler)
+//                .observationPredicate((name, context) -> {
+//                    // span name 특정하여 수집 (metrics 수집에도 반영됨)
+//                    log.info("[OBS Span Name] {}", name);
+//                    return name.equals("spring.batch.job") || name.equals("spring.batch.step");
+//                });
+//        return registry;
+//    }
+
+    //방법2. handler 오버라이딩 필터링: span 만 수집제외
     @Bean
     ObservationRegistry batchObservationRegistry(Tracer tracer) {
         var registry = ObservationRegistry.create();
@@ -74,8 +111,14 @@ public class OtelConfig {
             @Override public void onScopeClosed(Observation.Context context) { tracingHandler.onScopeClosed(context); }
 
         }).observationFilter(context -> {
+
             // guid span attribute 주입설정
+
+            String traceId = System.getenv("TRIGGER_TRACE_ID");
             String corrId  = System.getenv("CORRELATION_GUID");
+            if (traceId != null && !traceId.isBlank()) {
+                context.addLowCardinalityKeyValue(KeyValue.of("trigger.trace_id", traceId));
+            }
             if (corrId != null && !corrId.isBlank()) {
                 context.addLowCardinalityKeyValue(KeyValue.of("guid", corrId));
             }

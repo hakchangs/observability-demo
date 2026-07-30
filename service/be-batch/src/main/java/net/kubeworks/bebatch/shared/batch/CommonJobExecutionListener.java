@@ -9,7 +9,7 @@ import org.springframework.batch.core.listener.JobExecutionListener;
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 
-@Component
+//@Component
 public class CommonJobExecutionListener implements JobExecutionListener, Ordered {
 
     private final Logger log = LoggerFactory.getLogger(CommonJobExecutionListener.class);
