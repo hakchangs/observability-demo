@@ -5,6 +5,7 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
 import net.kubeworks.beproduct.legacy.LegacySender;
+import net.kubeworks.beproduct.service.BatchTriggerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -22,9 +23,11 @@ public class TestController {
     private static final Logger log = LoggerFactory.getLogger(TestController.class);
     private static final Tracer tracer = GlobalOpenTelemetry.getTracer("be-product");
     private final LegacySender legacySender;
+    private final BatchTriggerService batchTriggerService;
 
-    public TestController(LegacySender legacySender) {
+    public TestController(LegacySender legacySender, BatchTriggerService batchTriggerService) {
         this.legacySender = legacySender;
+        this.batchTriggerService = batchTriggerService;
     }
 
     @GetMapping("/error")
@@ -154,6 +157,14 @@ public class TestController {
         log.info("print legacy send...");
         legacySender.send(message);
         return Map.of("message", "ok");
+    }
+
+    @PostMapping("/batch/long")
+    public String triggerBatchLong() {
+        log.info("batch trigger start...");
+        boolean success = batchTriggerService.triggerLongRunningProbeJob();
+        if (success) return "success...";
+        return "failed...";
     }
 
 }
