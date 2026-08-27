@@ -36,12 +36,12 @@ export function setupLogBridge() {
   log.setLevel(log.getLevel());
 }
 
-export function emitHttpLog(attrs: Record<string, string | number>) {
+export function emitHttpLog(body: string, attrs: Record<string, string | number>) {
   const otelLogger = logs.getLogger("http-inout");
   otelLogger.emit({
     severityNumber: SeverityNumber.INFO,
     severityText: "INFO",
-    body: `${attrs.method} ${attrs.url} ${attrs.status}`,
+    body,
     attributes: attrs,
   });
 }
