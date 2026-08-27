@@ -4,10 +4,17 @@ import {
     IncomingMessage, ServerResponse
 } from "http";
 
+
+//LOG Bridge 설정
+import {setupLogBridge} from "./utils/otel/logger.server";
+setupLogBridge();
+
+//logger 설정
 import log from 'loglevel';
 const logger = log.getLogger('server-side');
 logger.setLevel("info");
 
+//앱 시작
 const app = next({
     turbopack: process.env.NODE_ENV !== "production",
 });
