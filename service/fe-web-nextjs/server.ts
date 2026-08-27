@@ -14,6 +14,9 @@ import log from 'loglevel';
 const logger = log.getLogger('server-side');
 logger.setLevel("info");
 
+//HTTP logger 설정
+import {emitHttpLog} from "./utils/otel/logger.server";
+
 //앱 시작
 const app = next({
     turbopack: process.env.NODE_ENV !== "production",
@@ -27,7 +30,14 @@ const createAppServer = () => {
         const start = Date.now();
         const {method, url} = request;
         response.on("finish", () => {
-            logger.info(`${method} ${url} ${response.statusCode} ${Date.now() - start}ms`);
+            const duration = Date.now() - start;
+            logger.info(`[access] ${method} ${url} ${response.statusCode} ${duration}ms`);
+            emitHttpLog({
+                method: method ?? "",
+                url: url ?? "",
+                status: response.statusCode,
+                duration_ms: duration,
+            })
         });
 
         await nextHandler(request, response);
