@@ -16,7 +16,7 @@ logger.setLevel("info");
 
 //HTTP logger 설정
 import {emitHttpLog} from "./utils/otel/logger.server";
-import {generateGuid} from "@/utils/otel/guid";
+import {generateGuid} from "./utils/otel/guid";
 
 //앱 시작
 const app = next({
