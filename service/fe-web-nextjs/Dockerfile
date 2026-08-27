@@ -6,12 +6,14 @@ ENV NEXT_PUBLIC_BFF_URL=$NEXT_PUBLIC_BFF_URL
 COPY package.json package-lock.json ./
 RUN npm ci --legacy-peer-deps
 COPY . .
-RUN npm run build && mkdir -p .next/standalone/public
+RUN npm run build
 
 FROM harbor.platform.local/dockerhub/library/node:20-alpine3.20
 WORKDIR /app
 ENV NODE_ENV=production
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static/
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/server.ts ./
 EXPOSE 3000
-CMD ["node", "server.js"]
+CMD ["npx", "tsx", "server.ts"]
