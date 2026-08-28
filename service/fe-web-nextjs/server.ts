@@ -16,6 +16,7 @@ logger.setLevel("info");
 
 //HTTP logger 설정
 import {generateGuid} from "./utils/otel/guid";
+import {context, propagation, trace} from "@opentelemetry/api";
 
 //앱 시작
 const app = next({
@@ -39,7 +40,7 @@ async function handleInoutTest(request: IncomingMessage, response: ServerRespons
     const {method, url} = request;
     const requestBodyBuffer = await readBody(request);
     const requestBody = requestBodyBuffer.toString('utf-8');
-    logHttpRequest(request, requestBody);
+    logHttpRequest(request, requestBody, guid);
 
     let responsePayload: unknown;
     let statusCode = 200;
@@ -61,29 +62,46 @@ async function handleInoutTest(request: IncomingMessage, response: ServerRespons
     response.end(responseBody);
 
     const duration = Date.now() - start;
-    logger.info(`[access] ${method} ${url} ${statusCode} ${duration}ms`);
-    logHttpResponse(request, response, responseBody);
+    logger.info(`[access] ${method} ${url} ${statusCode} ${duration}ms guid=${guid}`);
+    logHttpResponse(request, response, responseBody, guid);
 }
 
 const createAppServer = () => {
     const requestHandler = async (request: IncomingMessage, response: ServerResponse) => {
 
-        const guid = generateGuid();
         const start = Date.now();
         const {method, url} = request;
 
+        // 인입 요청의 traceparent/baggage 를 추출 (auto-instrumentation 이 이미 active span 을 만들어둔 상태)
+        const parentContext = propagation.extract(context.active(), request.headers, {
+            get: (carrier, key) => carrier[key]?.toString(),
+            keys: (carrier) => Object.keys(carrier),
+        });
+
+        // baggage 에 guid 가 이미 있으면 재사용(상위 서비스에서 전파), 없으면 새로 생성
+        const existingGuid = propagation.getBaggage(parentContext)?.getEntry("guid")?.value;
+        const guid = existingGuid ?? generateGuid();
+
+        // 현재 active span(HTTP auto-instrumentation) 에 guid attribute 추가
+        trace.getActiveSpan()?.setAttribute("guid", guid);
+
+        // 하위 호출(be-bff 등)까지 guid 가 전파되도록 baggage 에 실어 context 로 진행
+        const newBaggage = (propagation.getBaggage(parentContext) ?? propagation.createBaggage())
+            .setEntry("guid", {value: guid});
+        const requestContext = propagation.setBaggage(parentContext, newBaggage);
+
         if (url === INOUT_TEST_PATH) {
-            await handleInoutTest(request, response, guid, start);
+            await context.with(requestContext, () => handleInoutTest(request, response, guid, start));
             return;
         }
 
         response.on("finish", () => {
             const duration = Date.now() - start;
             const {statusCode} = response;
-            logger.info(`[access] ${method} ${url} ${statusCode} ${duration}ms`);
+            logger.info(`[access] ${method} ${url} ${statusCode} ${duration}ms guid=${guid}`);
         });
 
-        await nextHandler(request, response);
+        await context.with(requestContext, () => nextHandler(request, response));
     }
 
     return {
