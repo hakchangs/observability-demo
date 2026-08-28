@@ -1,5 +1,6 @@
 import log, {type LogLevelNames} from 'loglevel';
 import {logs, SeverityNumber} from '@opentelemetry/api-logs';
+import {IncomingMessage, ServerResponse} from "http";
 
 const SEVERITY: Record<LogLevelNames, SeverityNumber> = {
   trace: SeverityNumber.TRACE,
@@ -36,12 +37,63 @@ export function setupLogBridge() {
   log.setLevel(log.getLevel());
 }
 
-export function emitHttpLog(body: string, attrs: Record<string, string | number>) {
-  const otelLogger = logs.getLogger("http-inout");
+
+// 속성(attrs)추가 가능한 logger 추가
+function logWithAttrs(loggerName: string, level: LogLevelNames, body: string, attrs: Record<string, string | number>) {
+  const otelLogger = logs.getLogger(loggerName);
   otelLogger.emit({
-    severityNumber: SeverityNumber.INFO,
-    severityText: "INFO",
+    severityNumber: SEVERITY[level],
+    severityText: level.toUpperCase(),
     body,
     attributes: attrs,
   });
 }
+
+
+// HTTP 인아웃 로거 생성
+function logHttpInout(body: string, attrs: Record<string, string | number>) {
+  logWithAttrs("http-inout", "info", body, {
+    log_category: "app",
+    event_type: "http",
+    ...attrs,
+  });
+}
+
+export function logHttpRequest(request: IncomingMessage, requestBody: string) {
+
+  const {method, url, headers: requestHeaders} = request;
+  const requestHeadersFlat = Object.entries(requestHeaders)
+      .filter(([, v]) => v !== undefined)
+      .map(([k, v]) => `${k}: ${v}`).join(", ");
+
+  logHttpInout(`req=${requestBody}`, {
+    "http.event": "request",
+    "http.method": method ?? "",
+    "http.url": url ?? "",
+    "http.request.headers": requestHeadersFlat,
+    // "guid": guid,
+  });
+}
+
+export function logHttpResponse(request: IncomingMessage, response: ServerResponse, responseBody: string) {
+
+  const {method, url} = request;
+  const {statusCode} = response;
+
+  const responseHeadersFlat = Object.entries(response.getHeaders())
+      .filter(([, v]) => v !== undefined)
+      .map(([k, v]) => `${k}: ${v}`).join(", ");
+
+  logHttpInout(`res=${responseBody}`, {
+    "http.event": "response",
+    "http.method": method ?? "",
+    "http.response.headers": responseHeadersFlat,
+    "http.url": url ?? "",
+    "http.status": statusCode,
+    // "http.duration": duration,
+    // "guid": guid,
+  });
+}
+
+
+
