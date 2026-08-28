@@ -36,6 +36,8 @@ const createAppServer = () => {
         const requestContentType = requestHeaders['content-type'] ?? '';
         const isJsonRequest = requestContentType.includes('application/json');
 
+        logger.info(`[access.start] ${method} ${url}`);
+
         // request body 버퍼링 후 복원 (JSON 요청만)
         // if (isJsonRequest) {
         //     const requestHeadersFlat = Object.entries(requestHeaders)
@@ -80,7 +82,7 @@ const createAppServer = () => {
             const duration = Date.now() - start;
             const {statusCode} = response;
 
-            logger.info(`[access] ${method} ${url} ${statusCode} ${duration}ms`);
+            logger.info(`[access.finish] ${method} ${url} ${statusCode} ${duration}ms`);
 
             // 응답 Content-Type 이 JSON 인 경우만 OTel 로깅
             // const responseContentType = response.getHeader('content-type')?.toString() ?? '';
