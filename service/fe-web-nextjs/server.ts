@@ -30,80 +30,78 @@ const createAppServer = () => {
 
         const guid = generateGuid();
 
-        //http 요청 로깅
         const start = Date.now();
         const {method, url, headers: requestHeaders} = request;
-        const requestContentType = requestHeaders['content-type'] ?? '';
-        const isJsonRequest = requestContentType.includes('application/json');
 
-        logger.info(`[access.start] ${method} ${url}`);
+        //로깅 타겟 설정
+        const isInoutLoggingTarget = url === "/api/test/http-inout";
 
+        // http 요청 로깅
         // request body 버퍼링 후 복원 (JSON 요청만)
-        // if (isJsonRequest) {
-        //     const requestHeadersFlat = Object.entries(requestHeaders)
-        //         .filter(([, v]) => v !== undefined)
-        //         .map(([k, v]) => `${k}: ${v}`).join(", ");
-        //
-        //     const requestBodyBuffer = await new Promise<Buffer>((resolve, reject) => {
-        //         const chunks: Buffer[] = [];
-        //         request.on('data', chunk => chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)));
-        //         request.on('end', () => resolve(Buffer.concat(chunks)));
-        //         request.on('error', reject);
-        //     });
-        //     const requestBody = requestBodyBuffer.toString('utf-8');
-        //     if (requestBodyBuffer.length > 0) request.push(requestBodyBuffer);
-        //     request.push(null);
-        //
-        //     emitHttpLog(requestBody, {
-        //         log_category: "app",
-        //         event_type: "http",
-        //         "http.event": "request",
-        //         "http.method": method ?? "",
-        //         "http.url": url ?? "",
-        //         "http.request.headers": requestHeadersFlat,
-        //         "guid": guid,
-        //     });
-        // }
+        if (isInoutLoggingTarget) {
+            const requestHeadersFlat = Object.entries(requestHeaders)
+                .filter(([, v]) => v !== undefined)
+                .map(([k, v]) => `${k}: ${v}`).join(", ");
+
+            const requestBodyBuffer = await new Promise<Buffer>((resolve, reject) => {
+                const chunks: Buffer[] = [];
+                request.on('data', chunk => chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)));
+                request.on('end', () => resolve(Buffer.concat(chunks)));
+                request.on('error', reject);
+            });
+            const requestBody = requestBodyBuffer.toString('utf-8');
+            if (requestBodyBuffer.length > 0) request.push(requestBodyBuffer);
+            request.push(null);
+
+            emitHttpLog(requestBody, {
+                log_category: "app",
+                event_type: "http",
+                "http.event": "request",
+                "http.method": method ?? "",
+                "http.url": url ?? "",
+                "http.request.headers": requestHeadersFlat,
+                "guid": guid,
+            });
+        }
 
         // response body 가로채기 (응답 Content-Type 은 finish 시점에 확인)
-        // const responseChunks: Buffer[] = [];
-        // const originalWrite = response.write.bind(response);
-        // const originalEnd = response.end.bind(response);
-        // (response as any).write = (chunk: any, ...args: any[]) => {
-        //     if (chunk) responseChunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk)));
-        //     return originalWrite(chunk, ...args);
-        // };
-        // (response as any).end = (chunk?: any, ...args: any[]) => {
-        //     if (chunk) responseChunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk)));
-        //     return originalEnd(chunk, ...args);
-        // };
+        const responseChunks: Buffer[] = [];
+        const originalWrite = response.write.bind(response);
+        const originalEnd = response.end.bind(response);
+        (response as any).write = (chunk: any, ...args: any[]) => {
+            if (chunk) responseChunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk)));
+            return originalWrite(chunk, ...args);
+        };
+        (response as any).end = (chunk?: any, ...args: any[]) => {
+            if (chunk) responseChunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk)));
+            return originalEnd(chunk, ...args);
+        };
 
         response.on("finish", () => {
             const duration = Date.now() - start;
             const {statusCode} = response;
 
-            logger.info(`[access.finish] ${method} ${url} ${statusCode} ${duration}ms`);
+            logger.info(`[access] ${method} ${url} ${statusCode} ${duration}ms`);
 
-            // 응답 Content-Type 이 JSON 인 경우만 OTel 로깅
-            // const responseContentType = response.getHeader('content-type')?.toString() ?? '';
-            // if (!responseContentType.includes('application/json')) return;
-            //
-            // const responseBody = Buffer.concat(responseChunks).toString('utf-8');
-            // const responseHeadersFlat = Object.entries(response.getHeaders())
-            //     .filter(([, v]) => v !== undefined)
-            //     .map(([k, v]) => `${k}: ${v}`).join(", ");
-            //
-            // emitHttpLog(responseBody, {
-            //     log_category: "app",
-            //     event_type: "http",
-            //     "http.event": "response",
-            //     "http.method": method ?? "",
-            //     "http.response.headers": responseHeadersFlat,
-            //     "http.url": url ?? "",
-            //     "http.status": statusCode,
-            //     "http.duration": duration,
-            //     "guid": guid,
-            // });
+            // http 응답 로깅
+            if (isInoutLoggingTarget) {
+                const responseBody = Buffer.concat(responseChunks).toString('utf-8');
+                const responseHeadersFlat = Object.entries(response.getHeaders())
+                    .filter(([, v]) => v !== undefined)
+                    .map(([k, v]) => `${k}: ${v}`).join(", ");
+
+                emitHttpLog(responseBody, {
+                    log_category: "app",
+                    event_type: "http",
+                    "http.event": "response",
+                    "http.method": method ?? "",
+                    "http.response.headers": responseHeadersFlat,
+                    "http.url": url ?? "",
+                    "http.status": statusCode,
+                    "http.duration": duration,
+                    "guid": guid,
+                });
+            }
         });
 
         await nextHandler(request, response);
