@@ -66,14 +66,19 @@ const createAppServer = () => {
 
         // response body 가로채기 (응답 Content-Type 은 finish 시점에 확인)
         const responseChunks: Buffer[] = [];
+        const toBuffer = (chunk: any): Buffer => {
+            if (Buffer.isBuffer(chunk)) return chunk;
+            if (typeof chunk === 'string') return Buffer.from(chunk, 'utf-8');
+            return Buffer.from(chunk); // Uint8Array 등 typed array
+        };
         const originalWrite = response.write.bind(response);
         const originalEnd = response.end.bind(response);
         (response as any).write = (chunk: any, ...args: any[]) => {
-            if (chunk) responseChunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk)));
+            if (chunk) responseChunks.push(toBuffer(chunk));
             return originalWrite(chunk, ...args);
         };
         (response as any).end = (chunk?: any, ...args: any[]) => {
-            if (chunk) responseChunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk)));
+            if (chunk) responseChunks.push(toBuffer(chunk));
             return originalEnd(chunk, ...args);
         };
 
