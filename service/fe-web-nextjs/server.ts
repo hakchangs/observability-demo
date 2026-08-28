@@ -36,11 +36,11 @@ function readBody(req: IncomingMessage) {
 
 const INOUT_TEST_PATH = "/api/test/http-inout";
 
-async function handleInoutTest(request: IncomingMessage, response: ServerResponse, guid: string, start: number) {
+async function handleInoutTest(request: IncomingMessage, response: ServerResponse) {
     const {method, url} = request;
     const requestBodyBuffer = await readBody(request);
     const requestBody = requestBodyBuffer.toString('utf-8');
-    logHttpRequest(request, requestBody, guid);
+    logHttpRequest(request, requestBody);
 
     let responsePayload: unknown;
     let statusCode = 200;
@@ -61,9 +61,7 @@ async function handleInoutTest(request: IncomingMessage, response: ServerRespons
     response.writeHead(statusCode, {"Content-Type": "application/json"});
     response.end(responseBody);
 
-    const duration = Date.now() - start;
-    logger.info(`[access] ${method} ${url} ${statusCode} ${duration}ms guid=${guid}`);
-    logHttpResponse(request, response, responseBody, guid);
+    logHttpResponse(request, response, responseBody);
 }
 
 const createAppServer = () => {
@@ -91,14 +89,17 @@ const createAppServer = () => {
         const requestContext = propagation.setBaggage(parentContext, newBaggage);
 
         if (url === INOUT_TEST_PATH) {
-            await context.with(requestContext, () => handleInoutTest(request, response, guid, start));
+            await context.with(requestContext, () => handleInoutTest(request, response));
+            const duration = Date.now() - start;
+            const {statusCode} = response;
+            logger.info(`[access] ${method} ${url} ${statusCode} ${duration}ms`);
             return;
         }
 
         response.on("finish", () => {
             const duration = Date.now() - start;
             const {statusCode} = response;
-            logger.info(`[access] ${method} ${url} ${statusCode} ${duration}ms guid=${guid}`);
+            logger.info(`[access] ${method} ${url} ${statusCode} ${duration}ms`);
         });
 
         await context.with(requestContext, () => nextHandler(request, response));

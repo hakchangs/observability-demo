@@ -60,7 +60,7 @@ function logHttpInout(body: string, attrs: Record<string, string | number>) {
   });
 }
 
-export function logHttpRequest(request: IncomingMessage, requestBody: string, guid: string) {
+export function logHttpRequest(request: IncomingMessage, requestBody: string) {
 
   const {method, url, headers: requestHeaders} = request;
   const requestHeadersFlat = Object.entries(requestHeaders)
@@ -72,11 +72,10 @@ export function logHttpRequest(request: IncomingMessage, requestBody: string, gu
     "http.method": method ?? "",
     "http.url": url ?? "",
     "http.request.headers": requestHeadersFlat,
-    "guid": guid,
   });
 }
 
-export function logHttpResponse(request: IncomingMessage, response: ServerResponse, responseBody: string, guid: string) {
+export function logHttpResponse(request: IncomingMessage, response: ServerResponse, responseBody: string) {
 
   const {method, url} = request;
   const {statusCode} = response;
@@ -91,7 +90,6 @@ export function logHttpResponse(request: IncomingMessage, response: ServerRespon
     "http.response.headers": responseHeadersFlat,
     "http.url": url ?? "",
     "http.status": statusCode,
-    "guid": guid,
   });
 }
 
