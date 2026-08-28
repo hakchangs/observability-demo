@@ -23,72 +23,64 @@ const app = next({
 });
 const nextHandler = app.getRequestHandler();
 
+
+function readBody(req: IncomingMessage) {
+    return new Promise<Buffer>((resolve, reject) => {
+        const chunks: Buffer[] = [];
+        req.on("data", chunk => chunks.push(chunk));
+        req.on("end", () => resolve(Buffer.concat(chunks)));
+        req.on("error", reject);
+    });
+}
+
+const INOUT_TEST_PATH = "/api/test/http-inout";
+
+async function handleInoutTest(request: IncomingMessage, response: ServerResponse, guid: string, start: number) {
+    const {method, url} = request;
+    const requestBodyBuffer = await readBody(request);
+    const requestBody = requestBodyBuffer.toString('utf-8');
+    logHttpRequest(request, requestBody);
+
+    let responsePayload: unknown;
+    let statusCode = 200;
+
+    if (method === "POST") {
+        try {
+            const parsed = requestBody.length > 0 ? JSON.parse(requestBody) : {};
+            responsePayload = {received: parsed};
+        } catch {
+            statusCode = 400;
+            responsePayload = {error: "invalid json"};
+        }
+    } else {
+        responsePayload = {status: "UP"};
+    }
+
+    const responseBody = JSON.stringify(responsePayload);
+    response.writeHead(statusCode, {"Content-Type": "application/json"});
+    response.end(responseBody);
+
+    const duration = Date.now() - start;
+    logger.info(`[access] ${method} ${url} ${statusCode} ${duration}ms`);
+    logHttpResponse(request, response, responseBody);
+}
+
 const createAppServer = () => {
     const requestHandler = async (request: IncomingMessage, response: ServerResponse) => {
 
         const guid = generateGuid();
-
         const start = Date.now();
         const {method, url} = request;
 
-        //로깅 타겟 설정
-        const isInoutLoggingTarget = url === "/api/test/http-inout";
-
-        // http 요청 로깅
-        if (isInoutLoggingTarget) {
-            const chunks: Buffer[] = [];
-            const onData = (chunk: any) => chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
-            const requestBodyBuffer = await new Promise<Buffer>((resolve, reject) => {
-                request.on('data', onData);
-                request.once('end', () => resolve(Buffer.concat(chunks)));
-                request.once('error', reject);
-            });
-
-            logHttpRequest(request, requestBodyBuffer.toString('utf-8'));
-
-            if (requestBodyBuffer.length > 0) {
-                request.off('data', onData); // 우리 리스너 제거 (재발화 방지)
-
-                // 스트림 상태 리셋: flowing=null 이면 Next.js 가 'data' 리스너 추가 시 자동 재개
-                const state = (request as any)._readableState;
-                state.ended = false;
-                state.endEmitted = false;
-                state.flowing = null;
-
-                request.push(requestBodyBuffer);
-                request.push(null);
-            }
+        if (url === INOUT_TEST_PATH) {
+            await handleInoutTest(request, response, guid, start);
+            return;
         }
-
-        // response body 가로채기
-        const responseChunks: Buffer[] = [];
-        const toBuffer = (chunk: any): Buffer => {
-            if (Buffer.isBuffer(chunk)) return chunk;
-            if (typeof chunk === 'string') return Buffer.from(chunk, 'utf-8');
-            return Buffer.from(chunk); // Uint8Array 등 typed array
-        };
-        const originalWrite = response.write.bind(response);
-        const originalEnd = response.end.bind(response);
-        (response as any).write = (chunk: any, ...args: any[]) => {
-            if (chunk) responseChunks.push(toBuffer(chunk));
-            return originalWrite(chunk, ...args);
-        };
-        (response as any).end = (chunk?: any, ...args: any[]) => {
-            if (chunk) responseChunks.push(toBuffer(chunk));
-            return originalEnd(chunk, ...args);
-        };
 
         response.on("finish", () => {
             const duration = Date.now() - start;
             const {statusCode} = response;
-
             logger.info(`[access] ${method} ${url} ${statusCode} ${duration}ms`);
-
-            // http 응답 로깅
-            if (isInoutLoggingTarget) {
-                const responseBody = Buffer.concat(responseChunks).toString('utf-8');
-                logHttpResponse(request, response, responseBody);
-            }
         });
 
         await nextHandler(request, response);
@@ -107,4 +99,3 @@ app.prepare().then(() => {
         logger.info("server listening on port 3000");
     });
 });
-

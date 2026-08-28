@@ -52,7 +52,8 @@ function logWithAttrs(loggerName: string, level: LogLevelNames, body: string, at
 
 // HTTP 인아웃 로거 생성
 function logHttpInout(body: string, attrs: Record<string, string | number>) {
-  logWithAttrs("http-inout", "info", body, {
+  console.debug(body); //표준출력에 함께 노출
+  logWithAttrs("http-inout", "debug", body, {
     log_category: "app",
     event_type: "http",
     ...attrs,
@@ -90,7 +91,6 @@ export function logHttpResponse(request: IncomingMessage, response: ServerRespon
     "http.response.headers": responseHeadersFlat,
     "http.url": url ?? "",
     "http.status": statusCode,
-    // "http.duration": duration,
     // "guid": guid,
   });
 }
