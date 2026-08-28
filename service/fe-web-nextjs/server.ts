@@ -34,16 +34,25 @@ const createAppServer = () => {
         //로깅 타겟 설정
         const isInoutLoggingTarget = url === "/api/test/http-inout";
 
-        // http 요청 로깅 (스트림을 소비하지 않고 이벤트를 Next.js 와 공유)
+        // http 요청 로깅
         if (isInoutLoggingTarget) {
-            const bodyChunks: Buffer[] = [];
-            request.on('data', chunk => {
-                bodyChunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+            const requestBodyBuffer = await new Promise<Buffer>((resolve, reject) => {
+                const chunks: Buffer[] = [];
+                request.on('data', chunk => chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)));
+                request.on('end', () => resolve(Buffer.concat(chunks)));
+                request.on('error', reject);
             });
-            request.on('end', () => {
-                const requestBody = Buffer.concat(bodyChunks).toString('utf-8');
-                logHttpRequest(request, requestBody);
-            });
+
+            logHttpRequest(request, requestBodyBuffer.toString('utf-8'));
+
+            // 스트림 상태 리셋 후 body 복원 (Next.js 가 다시 읽을 수 있도록)
+            if (requestBodyBuffer.length > 0) {
+                const state = (request as any)._readableState;
+                state.ended = false;
+                state.endEmitted = false;
+                request.push(requestBodyBuffer);
+                request.push(null);
+            }
         }
 
         // response body 가로채기
