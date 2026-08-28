@@ -36,20 +36,25 @@ const createAppServer = () => {
 
         // http 요청 로깅
         if (isInoutLoggingTarget) {
+            const chunks: Buffer[] = [];
+            const onData = (chunk: any) => chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
             const requestBodyBuffer = await new Promise<Buffer>((resolve, reject) => {
-                const chunks: Buffer[] = [];
-                request.on('data', chunk => chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)));
-                request.on('end', () => resolve(Buffer.concat(chunks)));
-                request.on('error', reject);
+                request.on('data', onData);
+                request.once('end', () => resolve(Buffer.concat(chunks)));
+                request.once('error', reject);
             });
 
             logHttpRequest(request, requestBodyBuffer.toString('utf-8'));
 
-            // 스트림 상태 리셋 후 body 복원 (Next.js 가 다시 읽을 수 있도록)
             if (requestBodyBuffer.length > 0) {
+                request.off('data', onData); // 우리 리스너 제거 (재발화 방지)
+
+                // 스트림 상태 리셋: flowing=null 이면 Next.js 가 'data' 리스너 추가 시 자동 재개
                 const state = (request as any)._readableState;
                 state.ended = false;
                 state.endEmitted = false;
+                state.flowing = null;
+
                 request.push(requestBodyBuffer);
                 request.push(null);
             }
